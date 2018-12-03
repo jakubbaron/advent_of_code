@@ -41,6 +41,7 @@ bool diff_by_one(const std::string& in1, const std::string& in2) {
     if(in1[i] != in2[i]) count_diffs++; 
     if(count_diffs > 1) return false;
   }
+
   return true;
 }
 
