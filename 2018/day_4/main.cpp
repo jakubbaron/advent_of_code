@@ -12,10 +12,7 @@ int main(int argc, char** argv) {
   while (std::getline(infile, line)) {
     logs.emplace_back(line); 
   }
-    std::sort(logs.begin(), logs.end());
-  // for(const auto& item: logs) {
-  //   std::cout << item << "\n";
-  // }
+  std::sort(logs.begin(), logs.end());
 
   int year{0};
   int month{0};
@@ -78,6 +75,23 @@ int main(int argc, char** argv) {
   }
   std::cout << "Guard: " << guard_id_sleeping << " sleeps the most at: " << max_sleeping_minute << "\n";
   std::cout << guard_id_sleeping * max_sleeping_minute << "\n";
+
+  int most_sleep_at_minute{0};
+  int most_minute_asleep_guard_id{0};
+  int most_asleep_minute{0};
+  for(const auto& item: id_sleep_map) {
+    for(int i=0; i<60; i++) {
+      if(item.second[i] > most_sleep_at_minute) {
+        most_asleep_minute = i;
+        most_minute_asleep_guard_id = item.first;
+        most_sleep_at_minute = item.second[i];
+      }
+    }
+  }
+
+  std::cout << "Most asleep guard id: " << most_minute_asleep_guard_id << " at minute: " << most_asleep_minute << "\n";
+  std::cout << most_minute_asleep_guard_id * most_asleep_minute << "\n";
+
   
   return 0;
 }
