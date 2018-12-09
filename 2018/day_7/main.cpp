@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <queue>
 
 class Task;
 using STask = std::shared_ptr<Task>;
@@ -11,8 +12,10 @@ class Task {
   public:
     Task(const std::string& id):
       m_id(id),
-      m_finished(false) {
-
+      m_is_worked_on(false),
+      m_added_to_queue(false),
+      m_time_to_finish(60 + (id[0] - 'A' + 1)),
+      m_progress(0) {
     }
 
     void add_prerequisitive(STask stask) {
@@ -20,21 +23,32 @@ class Task {
     }
 
     const auto is_finished() const {
-      return m_finished;
+      return (m_progress == m_time_to_finish);
     }
+
     const auto get_id() const {
       return m_id;
     }
 
-    auto can_be_finished() const {
+    auto can_be_started() const {
       for(const auto& item: m_prerquisitves) {
         if(!item->is_finished()) {
           return false;
         }
       }
-      m_finished = true;
-      std::cout << m_id;
       return true;
+    }
+    void increment_progress() {
+      if(m_progress < m_time_to_finish) {
+        m_progress++;
+      }
+    }
+    
+    void set_added_to_queue() {
+      m_added_to_queue = true;
+    }
+    bool is_added_to_queue() {
+      return m_added_to_queue;
     }
 
     void print_prerequisitives() const {
@@ -44,11 +58,60 @@ class Task {
       }
       std::cout << std::endl;
     }
+    auto is_worked_on() const {
+      return m_is_worked_on;
+    }
+    void set_is_worked_on(bool is_worked_on) {
+      m_is_worked_on = is_worked_on;
+    }
+    auto get_progress() const {
+      return "(" + std::to_string(m_progress) + "/" + std::to_string(m_time_to_finish) + ")";
+    }
 
   private:
     std::string m_id;
-    mutable bool m_finished;
+    bool m_is_worked_on;
+    bool m_added_to_queue;
+    int m_time_to_finish;
+    int m_progress;
     std::vector<STask> m_prerquisitves;
+};
+
+class Elf {
+  public:
+    Elf(): m_stask(nullptr) {
+    }
+
+    void assign_task(STask stask) {
+      m_stask = stask;
+      m_stask->set_is_worked_on(true);
+    }
+
+    void increment_work() {
+      if(m_stask == nullptr) {
+        return;
+      }
+
+      m_stask->increment_progress();
+      if(m_stask->is_finished()) {
+        m_stask->set_is_worked_on(false);
+        m_stask = nullptr;
+      }
+    }
+
+    bool is_free() const {
+      return m_stask == nullptr;
+    }
+    auto working_on() const {
+      if(m_stask == nullptr) {
+        std::string progress = ".: (00/00)";
+        return progress;
+      }
+      std::string progress = m_stask->get_id() + ": " + m_stask->get_progress();
+      return progress;
+    }
+  private:
+    STask m_stask;
 };
 
 int main(int argc, char** argv) {
@@ -77,23 +140,52 @@ int main(int argc, char** argv) {
   for(const auto& item: map_id) {
     item.second->print_prerequisitives();
   }
+  std::vector<Elf> elfs{5,Elf{}};
 
   bool all_finished = false;
+  int full_time{0};
+  std::queue<STask> task_queue;
+  std::cout << "Time\tElf 1\tElf 2\t Elf 3\t Elf 4\t Elf 5\t Done\t\n";
   while(!all_finished) {
     all_finished = true;
+    std::string done{};
     for(const auto& item: map_id) {
       const auto& stask = item.second;
-
-      if(!stask->is_finished()) {
-        if(stask->can_be_finished()) {
-          all_finished = false;
-          break;
-        }
+      if(stask->can_be_started() && !stask->is_worked_on() && !stask->is_added_to_queue()) {
+        std::cout << "Pushing task: " << stask->get_id() << " on queue\n";
+        task_queue.push(stask);
+        stask->set_added_to_queue();
       }
-
+      if(stask->is_finished()) {
+        done += stask->get_id();
+      }
       all_finished &= stask->is_finished();
     }
+    for(auto& elf: elfs) {
+      if(task_queue.empty()) {
+        break;
+      }
+      if(elf.is_free()) {
+        auto stask = task_queue.front();
+        elf.assign_task(stask);
+        task_queue.pop();
+      }
+    }
+
+    std::cout << std::to_string(full_time) << "\t";
+    for(auto& elf: elfs) {
+      std::cout <<elf.working_on() <<  "\t";
+    }
+    std::cout << done << std::endl;
+
+    for(auto& elf: elfs) {
+      elf.increment_work();
+    }
+    if(!all_finished) {
+      full_time++;
+    }
   }
+  std::cout << "Total time taken: " << full_time << std::endl;
 
   return EXIT_SUCCESS;
 }
