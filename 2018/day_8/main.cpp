@@ -31,7 +31,6 @@ class Node {
       int number_of_metadata = *iter;
       iter++;
       used_tokens += 2;
-      //std::cout << "Creating children[" << number_of_children << "], metadata[" << number_of_metadata << "] VecLen: " << tokens.size();
       for(int i = 0; i < number_of_children; i++) {
         IntVec copy_vec{iter, tokens.end()};
         Node n{copy_vec};
@@ -40,14 +39,11 @@ class Node {
         children.push_back(n);
       }
 
-      //std::cout << " Metadata: ";
       for(int i = 0; i< number_of_metadata; i++) {
         metadata.push_back(*iter);
-        //std::cout << *iter << " ";
         iter++;
       }
       used_tokens += number_of_metadata;
-      //std::cout << " Used tokens: " << used_tokens << "\n";
     }
 
     long get_sum_metadata() const { 
@@ -59,6 +55,43 @@ class Node {
         sum += child.get_sum_metadata();
       }
       return sum;
+    }
+
+    auto get_number_of_childer() const {
+      return number_of_children;
+    }
+
+    long get_indexed_sum() const {
+      long sum{0};
+      if(number_of_children == 0) {
+        for(const auto& value: metadata) {
+          sum += value;
+        }
+        return sum;
+      }
+
+      for(const auto index: metadata) {
+        if(index == 0) {
+          std::cerr << "index 0, cont\n";
+          continue;
+        }
+        if(index - 1 < number_of_children) {
+          const auto& kiddo = children[index - 1];
+          sum += kiddo.get_indexed_sum();
+        }
+      }
+      return sum;
+    }
+
+    void print_metadata() const {
+      std::cout << "Numer of children " << number_of_children << " Metadata: ";
+      for(auto& item: metadata) {
+        std::cout << item << " "; 
+      }
+      std::cout << "\n";
+      for(auto& item: children) {
+        item.print_metadata();
+      }
     }
       
   private:
@@ -76,7 +109,9 @@ int main(int argc, char** argv) {
     tokens = split(line, ' '); 
   }
   Node root(tokens);
+  root.print_metadata();
   std::cout << "Sum of metadata: " << root.get_sum_metadata() << std::endl;
+  std::cout << "IndexedSum of metadata: " << root.get_indexed_sum() << std::endl;
 
   return EXIT_SUCCESS;
 }
