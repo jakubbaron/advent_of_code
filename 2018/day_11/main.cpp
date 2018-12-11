@@ -10,10 +10,8 @@ int main(int argc, char** argv) {
   constexpr auto size = 300;
   using Grid = std::vector<std::vector<int> >;
   Grid grid;
-  Grid sum;
   for(auto i = 0; i < size; i++) {
     grid.emplace_back(std::vector<int>(size, 0)); 
-    sum.emplace_back(std::vector<int>(size, 0)); 
   }
 
   //calc values for the grid
@@ -33,23 +31,30 @@ int main(int argc, char** argv) {
     }
   }
 
-  int max_val = 0;
+  int64_t max_val = 0;
   int max_x = 0;
   int max_y = 0;
-  for(int y = 1; y < size - 1; y++) {
-    for(int x = 1; x < size - 1; x++) {
-      std::vector<int> temp = {grid[y-1][x-1], grid[y-1][x], grid[y-1][x+1],
-                                    grid[y][x-1], grid[y][x], grid[y][x+1],
-                                    grid[y+1][x-1], grid[y+1][x], grid[y+1][x+1]};
-      sum[y][x] = std::accumulate(temp.begin(), temp.end(), 0);
-      if(sum[y][x] > max_val) {
-        max_val = sum[y][x];
-        max_x = x;
-        max_y = y;
+  int max_size = 0;
+  for(int sq_size = 1; sq_size < 300; sq_size++) {
+    for(int y = 0; y < size - sq_size; y++) {
+      for(int x = 0; x < size - sq_size; x++) {
+        int64_t sum = 0;
+        for(int dy = 0; dy < sq_size; dy++) {
+          for(int dx = 0; dx < sq_size; dx++) {
+            sum += grid[y+dy][x+dx];
+          }
+        }
+        if(sum > max_val) {
+          max_val = sum;
+          max_x = x + 1;
+          max_y = y + 1;
+          max_size = sq_size;
+        }
       }
     }
   }
-  std::cout << "Max point X,Y: " << max_x << " " << max_y << " val: " << max_val << std::endl;
+  std::cout << "Max point X,Y: " << max_x << " " << max_y << " val: " << max_val << 
+    " size: " << max_size << std::endl;
 
  // for(auto row = 10; row < 15; row++) {
  //   for(auto col = 18; col < 25; col++) {
