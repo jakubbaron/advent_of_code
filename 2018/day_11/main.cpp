@@ -1,12 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
-#include <algorithm>
-#include <numeric>
 
 int main(int argc, char** argv) {
   constexpr auto serial_number = 9110;
-  //constexpr auto serial_number = 18;
   constexpr auto size = 300;
   using Grid = std::vector<std::vector<int> >;
   Grid grid;
@@ -49,19 +46,14 @@ int main(int argc, char** argv) {
           max_x = x + 1;
           max_y = y + 1;
           max_size = sq_size;
+          std::cout << "Max point X,Y: " << max_x << " " << max_y << " val: " << max_val << 
+            " size: " << max_size << std::endl;
         }
       }
     }
   }
   std::cout << "Max point X,Y: " << max_x << " " << max_y << " val: " << max_val << 
     " size: " << max_size << std::endl;
-
- // for(auto row = 10; row < 15; row++) {
- //   for(auto col = 18; col < 25; col++) {
- //     std::cout << std::setw(3) << sum[row][col] << " ";
- //   }
- //   std::cout << std::endl;
- // }
 
   return EXIT_SUCCESS;
 
