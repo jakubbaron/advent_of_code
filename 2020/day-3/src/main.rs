@@ -1,6 +1,13 @@
 use std::fs::File;
-use std::io::{self, BufReader};
 use std::io::prelude::*;
+use std::io::{self, BufReader};
+
+// fn print_slope(vec: &Vec<Vec<char>>) {
+//     for line in vec.iter() {
+//         let p: String = line.into_iter().collect();
+//         println!("{}", p);
+//     }
+// }
 
 fn main() -> io::Result<()> {
     let f = File::open("input.txt")?;
@@ -12,24 +19,28 @@ fn main() -> io::Result<()> {
         let chars = my_string.chars().collect::<Vec<char>>();
         vec.push(chars);
     }
-    let mut i = 0;
-    let mut j = 0;
-    let mut counter = 0;
-    while i < vec.len() && j < vec[0].len() {
-        if vec[i][j] == '#' {
-            counter += 1;
-            vec[i][j] = 'X';
+    let tuples = vec![(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
+    let mut end: u64 = 1;
+    for (right, down) in tuples.iter() {
+        let mut i = 0;
+        let mut j = 0;
+        let mut counter = 0;
+        while i < vec.len() && j < vec[0].len() {
+            if vec[i][j] == '#' {
+                counter += 1;
+            }
+            i += down;
+            j += right;
+            if j >= vec[0].len() {
+                j = j - vec[0].len();
+            }
         }
-        i += 1;
-        j += 3;
-        if j >= vec[0].len() {
-            j = j - vec[0].len();
-        }
+        println!(
+            "Encountered {} trees right={} down={}",
+            counter, right, down
+        );
+        end *= counter;
     }
-    for line in vec.iter() {
-        let p: String = line.into_iter().collect();
-        println!("{}", p);
-    }
-    println!("Encountered {} trees", counter);
+    println!("Multiplied {} trees", end);
     Ok(())
 }
