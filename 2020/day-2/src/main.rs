@@ -26,23 +26,33 @@ impl Password {
         }
     }
 
-    fn is_valid(self) -> bool {
+    fn is_valid_part_one(&self) -> bool {
         let c = self.password.matches(&self.character).count();
         return c >= self.min_occur && c <= self.max_occur;
+    }
+    fn is_valid_part_two(&self) -> bool {
+        let c1 = &self.password[(self.min_occur - 1)..self.min_occur];
+        let c2 = &self.password[(self.max_occur - 1)..self.max_occur];
+        return (c1 == self.character) ^ (c2 == self.character);
     }
 }
 fn main() -> io::Result<()> {
     let f = File::open("input.txt")?;
     let f = BufReader::new(f);
-    let mut counter = 0;
+    let mut counter_1 = 0;
+    let mut counter_2 = 0;
     for line in f.lines() {
         let my_string = line.unwrap();
         let pass = Password::from_string(&my_string);
-        if pass.is_valid() {
-            counter += 1;
+        if pass.is_valid_part_one() {
+            counter_1 += 1;
+        }
+        if pass.is_valid_part_two() {
+            counter_2 += 1;
         }
     }
-    println!("{}", counter);
+    println!("{}", counter_1);
+    println!("{}", counter_2);
 
     Ok(())
 }
