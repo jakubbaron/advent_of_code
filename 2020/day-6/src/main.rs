@@ -15,54 +15,49 @@ fn main() -> io::Result<()> {
         let my_string = line.unwrap();
         vec.push(my_string);
     }
+    let mut groups: Vec<Vec<String>> = Vec::new();
+    let mut tmp = Vec::new();
+    for line in vec {
+        if line.is_empty() {
+            groups.push(tmp.to_vec());
+            tmp.clear();
+            continue;
+        }
+        tmp.push(line);
+    }
+    groups.push(tmp.to_vec());
+
+    let groups = groups;
 
     let mut counter = 0;
-    for line in &vec {
-        if line.is_empty() {
-            counter += letters.len();
-            letters.clear();
+    for group in groups.iter() {
+        for line in group.iter() {
+            if line.is_empty() {
+            }
+            let temp: HashSet<char> = line.chars().collect();
+            letters.extend(&temp);
         }
-        let temp: HashSet<char> = line.chars().collect();
-        letters.extend(&temp);
-    }
-
-    if !letters.is_empty() {
         counter += letters.len();
         letters.clear();
     }
+
     println!("{} answers", counter);
 
-    let mut char_count: HashMap<char, i32> = HashMap::new();
-    let mut group_len = 0;
+    let mut char_count: HashMap<char, usize> = HashMap::new();
     let mut counter_2 = 0;
-    for line in &vec {
-        if line.is_empty() {
-            // println!("{:?} {}", char_count, group_len);
-            for (k, v) in char_count.iter() {
-                if *v == group_len {
-                    counter_2 += 1;
-                }
-            }
-            char_count.clear();
-            group_len = 0;
-            continue;
-        }
-        group_len += 1;
-        for c in line.chars().collect::<Vec<char>>() {
-            match char_count.get_mut(&c) {
-                Some(v) => {
-                    *v += 1;
-                }
-                None => {
-                    char_count.insert(c, 1);
-                }
+    for group in groups.iter() {
+        for line in group.iter() {
+            for c in line.chars().collect::<Vec<char>>() {
+                *char_count.entry(c).or_insert(0) += 1
             }
         }
-    }
-    for (k, v) in char_count.iter() {
-        if *v == group_len {
-            counter_2 += 1;
+        for (k, v) in char_count.iter() {
+            if *v == group.len() {
+                counter_2 += 1;
+            }
         }
+        char_count.clear();
+        continue;
     }
 
     println!("{} common answers", counter_2);
