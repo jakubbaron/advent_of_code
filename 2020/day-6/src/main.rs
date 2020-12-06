@@ -51,7 +51,7 @@ fn main() -> io::Result<()> {
                 *char_count.entry(c).or_insert(0) += 1
             }
         }
-        for (k, v) in char_count.iter() {
+        for (_k, v) in char_count.iter() {
             if *v == group.len() {
                 counter_2 += 1;
             }
