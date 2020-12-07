@@ -1,19 +1,25 @@
+use regex::Regex;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, BufReader};
-use regex::Regex;
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct Bag {
     color: String,
     number: i32,
 }
 
+#[derive(Debug, Clone)]
+struct MultiBag {
+    bag: Bag,
+    multiplier: i32,
+}
+
 fn main() -> io::Result<()> {
-    let f = File::open("input.txt")?;
     // let f = File::open("test.txt")?;
+    // let f = File::open("test2.txt")?;
+    let f = File::open("input.txt")?;
     let f = BufReader::new(f);
     let mut vec = Vec::new();
     let mut all_bags: HashMap<String, Vec<Bag>> = HashMap::new();
@@ -63,7 +69,7 @@ fn main() -> io::Result<()> {
         let mut queue: Vec<Bag> = v.to_vec();
         while !queue.is_empty() {
             let item = queue.pop().unwrap();
-            let Bag{ color, number: _ } = item;
+            let Bag { color, number: _ } = item;
             if color == sought_color {
                 counter += 1;
                 break;
@@ -76,5 +82,41 @@ fn main() -> io::Result<()> {
         queue.clear();
     }
     println!("Counter: {}", counter);
+
+    let mut queue: Vec<MultiBag> = all_bags
+        .get(sought_color)
+        .unwrap()
+        .iter()
+        .map(|b| MultiBag {
+            bag: b.clone(),
+            multiplier: 1,
+        })
+        .collect();
+
+    let mut shiny_counter = 0;
+    while !queue.is_empty() {
+        // println!("{:?}", queue);
+        let item = queue.pop().unwrap();
+        let MultiBag {
+            bag: Bag { color, number },
+            multiplier,
+        } = item;
+        shiny_counter += multiplier * number;
+        match all_bags.get(&color) {
+            Some(v) => {
+                queue.extend(
+                    v.iter()
+                        .map(|b| MultiBag {
+                            bag: b.clone(),
+                            multiplier: multiplier * number,
+                        })
+                        .collect::<Vec<MultiBag>>(),
+                );
+            }
+            None => (),
+        }
+    }
+    println!("Counter in shiny gold: {}", shiny_counter);
+
     Ok(())
 }
