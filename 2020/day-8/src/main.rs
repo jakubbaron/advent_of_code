@@ -10,7 +10,7 @@ fn run_code(vec: Vec<String>, mut id:i32, mut acc:i32, mut visited: HashSet<i32>
         let tmp: Vec<&str> = vec[id as usize].split(" ").collect();
         let instr: &str = tmp[0].trim();
         let number = tmp[1].parse::<i32>().unwrap();
-        let mut new_id = -1;
+        let new_id;
         let mut new_acc = acc;
 
 
@@ -19,7 +19,7 @@ fn run_code(vec: Vec<String>, mut id:i32, mut acc:i32, mut visited: HashSet<i32>
                 new_id = id + 1;
             },
             "acc" => {
-                new_acc += number;
+                new_acc = acc + number;
                 new_id = id + 1;
             },
             "jmp" => {
