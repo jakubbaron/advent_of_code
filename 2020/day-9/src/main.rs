@@ -15,11 +15,8 @@ fn is_sum(slice: &[i64], number: i64) -> bool {
 }
 
 fn main() -> io::Result<()> {
-    let f = File::open("test.txt")?;
-    let preamble_len = 5;
-    // let f = File::open("test2.txt")?;
-    let f = File::open("input.txt")?;
-    let preamble_len = 25;
+    // let f = File::open("test.txt")?; let preamble_len = 5;
+    let f = File::open("input.txt")?; let preamble_len = 25;
     let f = BufReader::new(f);
     let mut vec = Vec::new();
 
@@ -29,19 +26,20 @@ fn main() -> io::Result<()> {
     }
     let vec: Vec<i64> = vec.into_iter().map(|x| x.parse::<i64>().unwrap()).collect();
 
+    let mut answer = 127;
+    // let answer = 466456641;
     for i in preamble_len..vec.len() {
         if !is_sum(&vec[i-preamble_len..i], vec[i]) {
-            println!("{}", vec[i]);
+            answer = vec[i];
+            println!("{}", answer);
             break;
         }
     }
 
-    let answer = 466456641;
-    // let answer = 127;
     let mut has_answer = false;
     for i in 0..vec.len() {
-        for j in 1..(vec.len() - i) {
-            let slice: &[i64] = &vec[i..(i+j)];
+        for j in (i+1)..vec.len() {
+            let slice: &[i64] = &vec[i..j];
             let sum: i64 = slice.iter().sum();
             if sum == answer {
                 let min_val = slice.iter().min().unwrap();
