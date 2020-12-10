@@ -30,25 +30,27 @@ fn main() -> io::Result<()> {
     // }
     println!("{}", count.get(&1).unwrap() * count.get(&3).unwrap());
 
-    // let available: HashSet<i32> = vec.to_vec().into_iter().collect();
-
-    let mut pow2 = 0;
-    let mut pow7 = 0;
-
-    for i in 1..vec.len() - 1 {
-        let negative;
-        if i >= 3 {
-            negative = vec[i-3];
+    let mut ans: Vec<i64> = vec.to_vec().into_iter().map(|x| x as i64).collect();
+    ans[0] = 1;
+    for i in 2..vec.len() {
+        let helper;
+        if i >=4 {
+            helper = vec[i-4];
         } else {
-            negative = -9999;
+            helper = -5555;
         }
-        if vec[i+1] - negative == 4 {
-            pow7 += 1;
-            pow2 -= 2;
-        } else if vec[i+1] - vec[i-1] == 2 {
-            pow2 += 1;
+        if vec[i] - helper == 4 {
+            ans[i] = ans[i-4] * 7;
+        } else if vec[i] - vec[i-2] == 2 {
+            ans[i] = ans[i-1] * 2;
+        } else {
+            ans[i] = ans[i-1];
         }
     }
-    println!("{}", 2_i64.pow(pow2) * 7_i64.pow(pow7));
+    println!("{:?}", vec);
+    println!("{:?}", ans);
+    println!("{}", ans.last().unwrap());
+
+
     Ok(())
 }
