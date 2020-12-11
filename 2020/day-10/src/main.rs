@@ -33,12 +33,11 @@ fn main() -> io::Result<()> {
     let mut ans: Vec<i64> = vec.to_vec().into_iter().map(|x| x as i64).collect();
     ans[0] = 1;
     for i in 2..vec.len() {
-        let helper;
-        if i >=4 {
-            helper = vec[i-4];
-        } else {
-            helper = -5555;
-        }
+        let helper = match i >= 4 {
+            true => vec[i-4],
+            false => vec[i],
+        };
+
         if vec[i] - helper == 4 {
             ans[i] = ans[i-4] * 7;
         } else if vec[i] - vec[i-2] == 2 {
