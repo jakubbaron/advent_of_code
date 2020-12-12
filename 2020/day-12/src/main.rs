@@ -15,7 +15,7 @@ fn modulo(x: i32, m: i32) -> i32 {
 
 fn main() -> io::Result<()> {
     let f = "test.txt";
-    // let f = "input.txt";
+    let f = "input.txt";
 
     let vec: Vec<String> = std::fs::read_to_string(f)?
         .lines()
@@ -81,5 +81,54 @@ fn main() -> io::Result<()> {
         println!("Pos {:?} direction {}", pos, directions[dir_idx as usize]);
     }
     println!("Manhatann distance {}", pos.0.abs() + pos.1.abs());
+
+    let mut waypoint = (1_i32, 10_i32);
+    let mut ship_pos = (0_i32, 0_i32);
+    for instruction in &instructions {
+        println!("{:?}", instruction);
+        let Instruction{letter, number} = instruction;
+        let number = *number;
+        let mut w_vertical_move = 0;
+        let mut w_horizontal_move = 0;
+        let mut s_vertical_move = 0;
+        let mut s_horizontal_move = 0;
+        let mut angle = 0_f32;
+        match letter.as_str() {
+            "N" => {
+                w_vertical_move = number;
+            },
+            "S" => {
+                w_vertical_move = - number;
+            },
+            "E" => {
+                w_horizontal_move = number;
+            },
+            "W" => {
+                w_horizontal_move = -number;
+            },
+            "L" => {
+                angle = -number as f32;
+            },
+            "R" => {
+                angle = number as f32;
+            },
+            "F" => {
+                s_vertical_move = number * waypoint.0;
+                s_horizontal_move = number * waypoint.1;
+            },
+            _ => ()
+        }
+        let s = angle.to_radians().sin().round();
+        let c = angle.to_radians().cos().round();
+        let xnew = waypoint.0 as f32 * c - waypoint.1 as f32 * s;
+        let ynew = waypoint.0 as f32 * s + waypoint.1 as f32 * c;
+        waypoint = (xnew as i32, ynew as i32);
+        waypoint.0 += w_vertical_move;
+        waypoint.1 += w_horizontal_move;
+        ship_pos.0 += s_vertical_move;
+        ship_pos.1 += s_horizontal_move;
+        println!("ShipPos {:?} waypoint {:?}", ship_pos, waypoint);
+    }
+    println!("Manhatann distance {}", ship_pos.0.abs() + ship_pos.1.abs());
     Ok(())
 }
