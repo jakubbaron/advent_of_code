@@ -1,8 +1,5 @@
-use std::collections::HashMap;
 use std::collections::HashSet;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::{self, BufReader};
+use std::io::{self};
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -82,16 +79,13 @@ fn run_code(
 }
 
 fn main() -> io::Result<()> {
-    let f = File::open("test.txt")?;
+    let f = "test.txt";
     // let f = File::open("test2.txt")?;
-    let f = File::open("input.txt")?;
-    let f = BufReader::new(f);
-    let mut vec = Vec::new();
-
-    for line in f.lines() {
-        let my_string = line.unwrap();
-        vec.push(my_string);
-    }
+    let f = "input.txt";
+    let vec: Vec<String> = std::fs::read_to_string(f)?
+        .lines()
+        .map(|x| x.to_string())
+        .collect();
 
     let id: i32 = 0;
     let acc = 0;
