@@ -81,12 +81,9 @@ fn main() -> io::Result<()> {
         let mut start = 0_u64;
         let mut interval = buses[curr_id - 1].bus_no;
         while curr_id < buses.len() {
-            // find first occurence
             let BusOffset { bus_no, offset } = buses[curr_id];
-            loop {
-                if (start + offset) % bus_no == 0 {
-                    break;
-                }
+            // find first occurence
+            while (start + offset) % bus_no != 0 {
                 start += interval;
             }
             // now buses are going to be aligned at the interval of below
