@@ -71,10 +71,10 @@ fn main() -> io::Result<()> {
             });
         }
 
-        let buses = bus_offsets;
         let mut start = 0_u64;
-        let mut interval = buses[0].bus_no;
-        for curr_bus in buses[1..buses.len()].iter() {
+        let (first_bus, other_buses) = bus_offsets.split_first().unwrap();
+        let mut interval = first_bus.bus_no;
+        for curr_bus in other_buses.iter() {
             let BusOffset { bus_no, offset } = curr_bus;
             // find first occurence
             while (start + offset) % bus_no != 0 {
