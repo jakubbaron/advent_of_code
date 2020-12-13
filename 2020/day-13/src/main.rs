@@ -12,8 +12,8 @@ struct BusOffset {
 }
 
 impl BusTimestamp {
-    fn minutes_to_wait(&self, timestamp: i32) -> i32 {
-        self.timestamp - timestamp
+    fn part_1(&self, timestamp: i32) -> i32 {
+        (self.timestamp - timestamp) * self.bus_no
     }
 }
 
@@ -55,14 +55,8 @@ fn main() -> io::Result<()> {
                 };
             }
         }
-        println!(
-            "Minutes to wait {}",
-            first_bus.minutes_to_wait(timestamp) * first_bus.bus_no
-        );
-        assert_eq!(
-            first_bus.minutes_to_wait(timestamp) * first_bus.bus_no,
-            *result_1
-        );
+        println!("Minutes to wait {}", first_bus.part_1(timestamp));
+        assert_eq!(first_bus.part_1(timestamp), *result_1);
 
         let mut bus_offsets: Vec<BusOffset> = Vec::new();
         for (offset, bus_no) in bus_numbers.iter().enumerate() {
