@@ -35,50 +35,54 @@ fn main() -> io::Result<()> {
             .collect();
         let timestamp = vec[0].parse::<i32>().unwrap();
         let bus_numbers: Vec<&str> = vec[1].split(",").collect();
-        let mut first_bus = BusTimestamp{bus_no:-1, timestamp: timestamp * 10};
+        let mut first_bus = BusTimestamp {
+            bus_no: -1,
+            timestamp: timestamp * 10,
+        };
         for bus_number in bus_numbers.iter() {
             let number = match bus_number.parse::<i32>() {
                 Ok(number) => number,
-                Err(_e) => {
-                    continue
-                },
+                Err(_e) => continue,
             };
             let mut tmp = 0;
             while tmp <= timestamp {
                 tmp += number;
             }
             if tmp < first_bus.timestamp {
-                first_bus = BusTimestamp{bus_no: number, timestamp: tmp};
+                first_bus = BusTimestamp {
+                    bus_no: number,
+                    timestamp: tmp,
+                };
             }
         }
-        println!("Minutes to wait {}", first_bus.minutes_to_wait(timestamp) * first_bus.bus_no);
-        assert_eq!(first_bus.minutes_to_wait(timestamp) * first_bus.bus_no, *result_1);
+        println!(
+            "Minutes to wait {}",
+            first_bus.minutes_to_wait(timestamp) * first_bus.bus_no
+        );
+        assert_eq!(
+            first_bus.minutes_to_wait(timestamp) * first_bus.bus_no,
+            *result_1
+        );
 
         let mut bus_offsets: Vec<BusOffset> = Vec::new();
         for (offset, bus_no) in bus_numbers.iter().enumerate() {
             let number = match bus_no.parse::<u64>() {
                 Ok(number) => number,
-                Err(_e) => {
-                    continue
-                },
+                Err(_e) => continue,
             };
-            bus_offsets.push(BusOffset{ bus_no: number, offset: offset as u64 });
+            bus_offsets.push(BusOffset {
+                bus_no: number,
+                offset: offset as u64,
+            });
         }
 
-        // let first_bus = BusOffset{bus_no: 7, offset:0};
-        // let second_bus = BusOffset{bus_no: 13, offset: 1};
-        // let third_bus = BusOffset{bus_no: 59, offset: 4};
-        // let forth_bus = BusOffset{bus_no: 31, offset: 6};
-        // let fifth_bus = BusOffset{bus_no: 19, offset: 7};
-
-        // let buses = vec![first_bus, second_bus, third_bus, forth_bus, fifth_bus];
         let buses = bus_offsets;
         let mut curr_id = 1;
         let mut start = 0_u64;
         let mut interval = buses[curr_id - 1].bus_no;
         while curr_id < buses.len() {
             // find first occurence
-            let BusOffset{bus_no, offset} = buses[curr_id];
+            let BusOffset { bus_no, offset } = buses[curr_id];
             loop {
                 if (start + offset) % bus_no == 0 {
                     break;
