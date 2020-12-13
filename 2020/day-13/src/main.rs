@@ -58,6 +58,7 @@ fn main() -> io::Result<()> {
         println!("Minutes to wait {}", first_bus.part_1(timestamp));
         assert_eq!(first_bus.part_1(timestamp), *result_1);
 
+        // Part Two
         let mut bus_offsets: Vec<BusOffset> = Vec::new();
         for (offset, bus_no) in bus_numbers.iter().enumerate() {
             let number = match bus_no.parse::<u64>() {
