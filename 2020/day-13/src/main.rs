@@ -71,9 +71,9 @@ fn main() -> io::Result<()> {
             });
         }
 
-        let mut start = 0_u64;
         let (first_bus, other_buses) = bus_offsets.split_first().unwrap();
         let mut interval = first_bus.bus_no;
+        let mut start = 0_u64;
         for curr_bus in other_buses.iter() {
             let BusOffset { bus_no, offset } = curr_bus;
             // find first occurence
