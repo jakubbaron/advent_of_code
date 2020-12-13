@@ -19,15 +19,15 @@ impl BusTimestamp {
 
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 1068781_u64),
-        ("test2.txt", 3417_u64),
-        ("test3.txt", 754018_u64),
-        ("test4.txt", 779210_u64),
-        ("test5.txt", 1261476_u64),
-        ("test6.txt", 1202161486_u64),
-        ("input.txt", 1_u64),
+        ("test.txt", 295, 1068781_u64),
+        ("test2.txt", 130, 3417_u64),
+        ("test3.txt", 295, 754018_u64),
+        ("test4.txt", 295, 779210_u64),
+        ("test5.txt", 295, 1261476_u64),
+        ("test6.txt", 47, 1202161486_u64),
+        ("input.txt", 5946, 645338524823718_u64),
     ];
-    for (f, result) in files_results.iter() {
+    for (f, result_1, result_2) in files_results.iter() {
         println!("{}", f);
         let vec: Vec<String> = std::fs::read_to_string(f)?
             .lines()
@@ -51,8 +51,8 @@ fn main() -> io::Result<()> {
                 first_bus = BusTimestamp{bus_no: number, timestamp: tmp};
             }
         }
-        println!("{:?}", first_bus);
-        println!("{}", first_bus.minutes_to_wait(timestamp) * first_bus.bus_no);
+        println!("Minutes to wait {}", first_bus.minutes_to_wait(timestamp) * first_bus.bus_no);
+        assert_eq!(first_bus.minutes_to_wait(timestamp) * first_bus.bus_no, *result_1);
 
         let mut bus_offsets: Vec<BusOffset> = Vec::new();
         for (offset, bus_no) in bus_numbers.iter().enumerate() {
@@ -62,33 +62,35 @@ fn main() -> io::Result<()> {
                     continue
                 },
             };
-            println!("{} {}", number, offset);
             bus_offsets.push(BusOffset{ bus_no: number, offset: offset as u64 });
         }
 
-        let BusOffset{bus_no: last_bus_no, offset: last_offset}= bus_offsets.last().unwrap();
-        let BusOffset{bus_no: first_bus_no, offset: _}= bus_offsets.first().unwrap();
-        let end_range = last_bus_no * (first_bus_no + last_offset);
-        let mut start_range = *first_bus_no;
-        let range_offset = first_bus_no;
-        let mut all_match = false;
-        println!("{} {} {}", start_range, end_range, range_offset);
+        // let first_bus = BusOffset{bus_no: 7, offset:0};
+        // let second_bus = BusOffset{bus_no: 13, offset: 1};
+        // let third_bus = BusOffset{bus_no: 59, offset: 4};
+        // let forth_bus = BusOffset{bus_no: 31, offset: 6};
+        // let fifth_bus = BusOffset{bus_no: 19, offset: 7};
 
-        while !all_match {
-            all_match = true;
-            for bus_offset in bus_offsets.iter() {
-                let BusOffset{bus_no, offset} = bus_offset;
-                if (start_range + offset) % bus_no != 0 {
-                    all_match = false;
+        // let buses = vec![first_bus, second_bus, third_bus, forth_bus, fifth_bus];
+        let buses = bus_offsets;
+        let mut curr_id = 1;
+        let mut start = 0_u64;
+        let mut interval = buses[curr_id - 1].bus_no;
+        while curr_id < buses.len() {
+            // find first occurence
+            let BusOffset{bus_no, offset} = buses[curr_id];
+            loop {
+                if (start + offset) % bus_no == 0 {
                     break;
                 }
+                start += interval;
             }
-            if !all_match {
-                start_range += range_offset;
-            }
+            // now buses are going to be aligned at the interval of below
+            interval *= bus_no;
+            curr_id += 1;
         }
-        println!("{}", start_range);
-        assert_eq!(start_range, *result);
+        println!("First common occurence: {}", start);
+        assert_eq!(start, *result_2);
     }
     Ok(())
 }
