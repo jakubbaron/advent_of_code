@@ -26,6 +26,7 @@ fn main() -> io::Result<()> {
         ("test5.txt", 295, 1261476_u64),
         ("test6.txt", 47, 1202161486_u64),
         ("input.txt", 5946, 645338524823718_u64),
+        ("input2.txt", 2845, 487905974205117_u64),
     ];
     for (f, result_1, result_2) in files_results.iter() {
         println!("{}", f);
