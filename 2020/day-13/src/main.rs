@@ -72,18 +72,16 @@ fn main() -> io::Result<()> {
         }
 
         let buses = bus_offsets;
-        let mut curr_id = 1;
         let mut start = 0_u64;
-        let mut interval = buses[curr_id - 1].bus_no;
-        while curr_id < buses.len() {
-            let BusOffset { bus_no, offset } = buses[curr_id];
+        let mut interval = buses[0].bus_no;
+        for curr_bus in buses[1..buses.len()].iter() {
+            let BusOffset { bus_no, offset } = curr_bus;
             // find first occurence
             while (start + offset) % bus_no != 0 {
                 start += interval;
             }
             // now buses are going to be aligned at the interval of below
             interval *= bus_no;
-            curr_id += 1;
         }
         println!("First common occurence: {}", start);
         assert_eq!(start, *result_2);
