@@ -14,9 +14,9 @@ struct MaskV1 {
 impl MaskTrait for MaskV1 {
     fn apply_mask(&self, number: u64) -> u64 {
         if self.set {
-            return number | self.mask;
+            number | self.mask
         } else {
-            return number & !self.mask;
+            number & !self.mask
         }
     }
 }
@@ -24,9 +24,10 @@ impl MaskTrait for MaskV1 {
 impl MaskTrait for MaskV2 {
     fn apply_mask(&self, number: u64) -> u64 {
         if self.set {
-            return number | self.mask;
+            number | self.mask
+        } else {
+            number
         }
-        number
     }
 }
 
