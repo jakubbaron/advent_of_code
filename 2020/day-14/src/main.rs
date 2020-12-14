@@ -32,16 +32,12 @@ impl Mask for MaskV2 {
 
 impl MaskV2 {
     fn to_masks_v1(&self) -> (MaskV1, MaskV1) {
-        (
-            MaskV1 {
-                mask: self.mask,
-                set: self.set,
-            },
-            MaskV1 {
-                mask: self.mask,
-                set: !self.set,
-            },
-        )
+        let MaskV2 {
+            mask,
+            set,
+            float: _,
+        } = *self;
+        (MaskV1 { mask, set }, MaskV1 { mask, set: !set })
     }
 }
 
@@ -52,29 +48,27 @@ struct MaskV2 {
 }
 
 fn parse_masks_v1(mask: &str) -> Vec<MaskV1> {
-    let mut result: Vec<MaskV1> = Vec::new();
-    for (i, ch) in mask.chars().rev().enumerate() {
-        if ch == 'X' {
-            continue;
-        }
-        let set = ch == '1';
-        result.push(MaskV1 { mask: 1 << i, set });
-    }
-    result
+    mask.chars()
+        .rev()
+        .enumerate()
+        .filter(|(_i, ch)| *ch != 'X')
+        .map(|(i, ch)| MaskV1 {
+            mask: 1 << i,
+            set: ch == '1',
+        })
+        .collect()
 }
 
 fn parse_masks_v2(mask: &str) -> Vec<MaskV2> {
-    let mut result: Vec<MaskV2> = Vec::new();
-    for (i, ch) in mask.chars().rev().enumerate() {
-        let float = ch == 'X';
-        let set = ch == '1';
-        result.push(MaskV2 {
+    mask.chars()
+        .rev()
+        .enumerate()
+        .map(|(i, ch)| MaskV2 {
             mask: 1 << i,
-            set,
-            float,
-        });
-    }
-    result
+            set: ch == '1',
+            float: ch == 'X',
+        })
+        .collect()
 }
 
 fn apply_masks_v1(number: u64, masks: &Vec<MaskV1>) -> u64 {
