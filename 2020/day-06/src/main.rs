@@ -32,8 +32,6 @@ fn main() -> io::Result<()> {
     let mut counter = 0;
     for group in groups.iter() {
         for line in group.iter() {
-            if line.is_empty() {
-            }
             let temp: HashSet<char> = line.chars().collect();
             letters.extend(&temp);
         }

@@ -22,7 +22,7 @@ fn main() -> io::Result<()> {
     let vec = vec;
     let mut count: HashMap<i32, i32> = HashMap::new();
     for i in 1..vec.len() {
-        let diff = &vec[i] - &vec[i-1];
+        let diff = &vec[i] - &vec[i - 1];
         *count.entry(diff).or_insert(0) += 1;
     }
     // for (k, v) in count.iter() {
@@ -34,22 +34,21 @@ fn main() -> io::Result<()> {
     ans[0] = 1;
     for i in 2..vec.len() {
         let helper = match i >= 4 {
-            true => vec[i-4],
+            true => vec[i - 4],
             false => vec[i],
         };
 
         if vec[i] - helper == 4 {
-            ans[i] = ans[i-4] * 7;
-        } else if vec[i] - vec[i-2] == 2 {
-            ans[i] = ans[i-1] * 2;
+            ans[i] = ans[i - 4] * 7;
+        } else if vec[i] - vec[i - 2] == 2 {
+            ans[i] = ans[i - 1] * 2;
         } else {
-            ans[i] = ans[i-1];
+            ans[i] = ans[i - 1];
         }
     }
     println!("{:?}", vec);
     println!("{:?}", ans);
     println!("{}", ans.last().unwrap());
-
 
     Ok(())
 }

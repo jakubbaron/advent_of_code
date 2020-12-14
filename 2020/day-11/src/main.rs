@@ -11,14 +11,23 @@ fn main() -> io::Result<()> {
         .map(|x| x.to_string())
         .collect();
 
-    let vec: Vec<Vec<char>> = vec.into_iter().map(|x| x.replace("L", "#").chars().collect()).collect();
+    let vec: Vec<Vec<char>> = vec
+        .into_iter()
+        .map(|x| x.replace("L", "#").chars().collect())
+        .collect();
     for v in vec.iter() {
         println!("{:?}", v);
     }
     let directions = vec![
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1), (0, 1),
-        (1, -1), (1, 0), (1, 1)];
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (0, -1),
+        (0, 1),
+        (1, -1),
+        (1, 0),
+        (1, 1),
+    ];
     let occ = '#';
     let free = 'L';
     let floor = '.';

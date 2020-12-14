@@ -1,12 +1,12 @@
-use std::io::{self};
 use std::collections::HashSet;
+use std::io::{self};
 
 fn main() -> io::Result<()> {
     let f = "input.txt";
     let vec: Vec<i32> = std::fs::read_to_string(f)?
-       .lines()
-       .map(|x| x.parse::<i32>().unwrap())
-       .collect();
+        .lines()
+        .map(|x| x.parse::<i32>().unwrap())
+        .collect();
 
     let mut numbers = HashSet::new();
     for my_int in &vec {

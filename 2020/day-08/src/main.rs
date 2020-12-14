@@ -1,8 +1,7 @@
 use std::collections::HashSet;
 use std::io::{self};
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct Instruction {
     instr: String,
     number: i32,
@@ -50,7 +49,10 @@ fn run_code(
         if !is_branched {
             if instr.instr.as_str() == "nop" {
                 let mut vec_cp = vec.to_vec();
-                vec_cp[id as usize] = Instruction{instr: "jmp".to_string(), number: instr.number};
+                vec_cp[id as usize] = Instruction {
+                    instr: "jmp".to_string(),
+                    number: instr.number,
+                };
                 match run_code(
                     vec_cp,
                     id + instr.number,
@@ -64,7 +66,10 @@ fn run_code(
             }
             if instr.instr.as_str() == "jmp" {
                 let mut vec_cp = vec.to_vec();
-                vec_cp[id as usize] = Instruction{instr: "nop".to_string(), number: instr.number};
+                vec_cp[id as usize] = Instruction {
+                    instr: "nop".to_string(),
+                    number: instr.number,
+                };
                 match run_code(vec_cp, id + 1, acc.clone(), visited.clone(), true) {
                     Ok(val) => return Ok(val),
                     Err(_) => (),
