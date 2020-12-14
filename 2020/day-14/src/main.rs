@@ -71,11 +71,7 @@ fn parse_masks_v2(mask: &str) -> Vec<MaskV2> {
         .collect()
 }
 
-fn apply_masks_v1(number: u64, masks: &Vec<MaskV1>) -> u64 {
-    masks.iter().fold(number, |acc, mask| mask.apply_mask(acc))
-}
-
-fn apply_masks_v2(number: u64, masks: &Vec<MaskV2>) -> u64 {
+fn apply_masks<T: Mask>(number: u64, masks: &Vec<T>) -> u64 {
     masks.iter().fold(number, |acc, mask| mask.apply_mask(acc))
 }
 
@@ -84,7 +80,7 @@ fn generate_addresses(number: u64, masks: &Vec<MaskV2>) -> Vec<u64> {
         .iter()
         .filter(|x| x.float)
         .map(|x| x.to_masks_v1())
-        .fold(vec![apply_masks_v2(number, masks)], |acc, (m1, m2)| {
+        .fold(vec![apply_masks(number, masks)], |acc, (m1, m2)| {
             acc.into_iter()
                 .flat_map(|n| vec![m1.apply_mask(n), m2.apply_mask(n)].into_iter())
                 .collect()
@@ -133,7 +129,7 @@ fn main() -> io::Result<()> {
                 .parse::<u64>()
                 .unwrap();
 
-            mem_values_1.insert(mem_address, apply_masks_v1(value, &mask));
+            mem_values_1.insert(mem_address, apply_masks(value, &mask));
 
             for mem_addr_2 in generate_addresses(mem_address, &maskv2) {
                 mem_values_2.insert(mem_addr_2, value);
