@@ -104,14 +104,14 @@ fn main() -> io::Result<()> {
             .collect();
         let mut mem_values_1: HashMap<u64, u64> = HashMap::new();
         let mut mem_values_2: HashMap<u64, u64> = HashMap::new();
-        let mut mask = Vec::new();
-        let mut maskv2 = Vec::new();
+        let mut masks_v1 = Vec::new();
+        let mut masks_v2 = Vec::new();
         for line in vec.iter() {
             if re_mask.is_match(&line) {
                 let caps = re_mask.captures(&line).unwrap();
                 let tmp = caps.get(1).map_or("", |m| m.as_str());
-                mask = parse_masks_v1(&tmp);
-                maskv2 = parse_masks_v2(&tmp);
+                masks_v1 = parse_masks_v1(&tmp);
+                masks_v2 = parse_masks_v2(&tmp);
                 continue;
             }
             if !re_mem.is_match(&line) {
@@ -130,9 +130,9 @@ fn main() -> io::Result<()> {
                 .parse::<u64>()
                 .unwrap();
 
-            mem_values_1.insert(mem_address, apply_masks(value, &mask));
+            mem_values_1.insert(mem_address, apply_masks(value, &masks_v1));
 
-            for mem_addr_2 in generate_addresses(mem_address, &maskv2) {
+            for mem_addr_2 in generate_addresses(mem_address, &masks_v2) {
                 mem_values_2.insert(mem_addr_2, value);
             }
         }
