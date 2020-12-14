@@ -116,6 +116,7 @@ fn main() -> io::Result<()> {
             }
             if !re_mem.is_match(&line) {
                 println!("NOPE {}", &line);
+                assert!(false);
             }
             let caps = re_mem.captures(&line).unwrap();
             let mem_address = caps
@@ -125,7 +126,7 @@ fn main() -> io::Result<()> {
                 .unwrap();
             let value = caps
                 .get(2)
-                .map_or("0", |m| m.as_str())
+                .map_or("", |m| m.as_str())
                 .parse::<u64>()
                 .unwrap();
 
