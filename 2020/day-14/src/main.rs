@@ -137,16 +137,15 @@ fn main() -> io::Result<()> {
                 mem_values_2.insert(mem_addr_2, value);
             }
         }
-        let mut part_1 = 0;
-        for (_k, vals) in mem_values_1.iter() {
-            part_1 += vals;
-        }
-        let mut part_2 = 0;
-        for (_k, vals) in mem_values_2.iter() {
-            part_2 += vals;
-        }
-        assert_eq!(part_1, *result_1);
-        assert_eq!(part_2, *result_2);
+
+        assert_eq!(
+            mem_values_1.iter().fold(0, |acc, (_, val)| acc + val),
+            *result_1
+        );
+        assert_eq!(
+            mem_values_2.iter().fold(0, |acc, (_, val)| acc + val),
+            *result_2
+        );
     }
 
     Ok(())
