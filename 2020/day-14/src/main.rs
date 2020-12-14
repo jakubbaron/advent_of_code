@@ -87,7 +87,7 @@ fn generate_addresses(number: u64, masks: &Vec<MaskV2>) -> Vec<u64> {
         .fold(vec![apply_masks_v2(number, masks)], |acc, (m1, m2)| {
             acc.into_iter()
                 .map(|n| vec![m1.apply_mask(n), m2.apply_mask(n)])
-                .flat_map(|a| a.into_iter())
+                .flatten()
                 .collect()
         })
 }
