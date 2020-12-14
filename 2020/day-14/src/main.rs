@@ -2,7 +2,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::io::{self};
 
-trait Mask {
+trait MaskTrait {
     fn apply_mask(&self, number: u64) -> u64;
 }
 
@@ -11,7 +11,7 @@ struct MaskV1 {
     set: bool,
 }
 
-impl Mask for MaskV1 {
+impl MaskTrait for MaskV1 {
     fn apply_mask(&self, number: u64) -> u64 {
         if self.set {
             return number | self.mask;
@@ -21,7 +21,7 @@ impl Mask for MaskV1 {
     }
 }
 
-impl Mask for MaskV2 {
+impl MaskTrait for MaskV2 {
     fn apply_mask(&self, number: u64) -> u64 {
         if self.set {
             return number | self.mask;
@@ -71,7 +71,7 @@ fn parse_masks_v2(mask: &str) -> Vec<MaskV2> {
         .collect()
 }
 
-fn apply_masks<T: Mask>(number: u64, masks: &Vec<T>) -> u64 {
+fn apply_masks<T: MaskTrait>(number: u64, masks: &Vec<T>) -> u64 {
     masks.iter().fold(number, |acc, mask| mask.apply_mask(acc))
 }
 
