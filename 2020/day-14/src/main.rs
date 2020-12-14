@@ -30,17 +30,6 @@ impl Mask for MaskV2 {
     }
 }
 
-struct MaskV2 {
-    mask: u64,
-    set: bool,
-    float: bool,
-}
-
-enum MaskKind {
-    MaskV1,
-    MaskV2,
-}
-
 impl MaskV2 {
     fn to_masks_v1(&self) -> (MaskV1, MaskV1) {
         (
@@ -54,6 +43,12 @@ impl MaskV2 {
             },
         )
     }
+}
+
+struct MaskV2 {
+    mask: u64,
+    set: bool,
+    float: bool,
 }
 
 fn parse_masks_v1(mask: &str) -> Vec<MaskV1> {
