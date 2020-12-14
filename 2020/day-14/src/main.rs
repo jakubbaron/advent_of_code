@@ -80,20 +80,16 @@ fn apply_masks_v2(number: u64, masks: &Vec<MaskV2>) -> u64 {
 }
 
 fn generate_addresses(number: u64, masks: &Vec<MaskV2>) -> Vec<u64> {
-    let mut floats: Vec<u64> = vec![apply_masks_v2(number, masks)];
-    for iter_mask in masks.iter() {
-        if !iter_mask.float {
-            continue;
-        }
-        let (m1, m2) = iter_mask.to_masks_v1();
-        let mut tmp = Vec::new();
-        for n in floats {
-            tmp.push(m1.apply_mask(n));
-            tmp.push(m2.apply_mask(n));
-        }
-        floats = tmp.to_vec();
-    }
-    floats
+    masks
+        .iter()
+        .filter(|x| x.float)
+        .map(|x| x.to_masks_v1())
+        .fold(vec![apply_masks_v2(number, masks)], |acc, (m1, m2)| {
+            acc.into_iter()
+                .map(|n| vec![m1.apply_mask(n), m2.apply_mask(n)])
+                .flat_map(|a| a.into_iter())
+                .collect()
+        })
 }
 
 fn main() -> io::Result<()> {
