@@ -42,7 +42,7 @@ fn main() {
             result_2: 362,
         },
         InputResult {
-            input: vec![14_usize, 8, 16, 0, 1, 17],
+            input: vec![14, 8, 16, 0, 1, 17],
             result_1: 240,
             result_2: 505,
         },
