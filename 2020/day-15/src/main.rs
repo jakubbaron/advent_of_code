@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 struct InputResult {
     input: Vec<usize>,
     result_1: usize,
@@ -44,7 +42,7 @@ fn main() {
             result_2: 362,
         },
         InputResult {
-            input: vec![14, 8, 16, 0, 1, 17],
+            input: vec![14_usize, 8, 16, 0, 1, 17],
             result_1: 240,
             result_2: 505,
         },
@@ -57,24 +55,21 @@ fn main() {
             result_2,
         } = ir;
         println!("{:?}", input);
-        let mut tracker: HashMap<usize, usize> = HashMap::new();
-        // let mut vec_try = vec![0_usize, run_size];
+        let mut vec_try = vec![0_usize; run_size];
         let (last_spoken, elements) = input.split_last().unwrap();
         for (i, val) in elements.iter().enumerate() {
-            tracker.insert(*val, i + 1);
+            vec_try[*val] = i + 1;
         }
         let mut last_spoken = *last_spoken;
         for turn in input.len()..run_size {
-            match tracker.get(&last_spoken) {
-                Some(val) => {
-                    let tmp = last_spoken;
-                    last_spoken = turn - val;
-                    tracker.insert(tmp, turn);
-                }
-                None => {
-                    tracker.insert(last_spoken, turn);
-                    last_spoken = 0;
-                }
+            let val = vec_try[last_spoken];
+            if val == 0 {
+                vec_try[last_spoken] = turn;
+                last_spoken = 0;
+            } else {
+                let tmp = last_spoken;
+                last_spoken = turn - val;
+                vec_try[tmp] = turn;
             }
             if turn == 2020 - 1 {
                 assert_eq!(last_spoken, *result_1);
