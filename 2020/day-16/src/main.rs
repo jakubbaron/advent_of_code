@@ -141,7 +141,7 @@ fn main() -> io::Result<()> {
         let product = valid_keys
             .iter()
             .zip(my_ticket.iter())
-            .filter(|(key, val)| key.contains("departure"))
+            .filter(|(key, _val)| key.contains("departure"))
             .fold(1, |acc, (_, val)| val * acc);
 
         println!("Product: {}", product);
