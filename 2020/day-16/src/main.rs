@@ -1,7 +1,7 @@
-use std::io::{self};
 use regex::Regex;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::io::{self};
 
 #[derive(Debug, Clone)]
 struct Range {
@@ -12,7 +12,8 @@ struct Range {
 }
 impl Range {
     fn in_range(&self, number: usize) -> bool {
-        (self.lower_min <= number && self.lower_max >= number) || (self.upper_min <= number && self.upper_max >= number)
+        (self.lower_min <= number && self.lower_max >= number)
+            || (self.upper_min <= number && self.upper_max >= number)
     }
 
     fn from_vec(numbers: &Vec<usize>) -> Range {
@@ -41,26 +42,42 @@ fn main() -> io::Result<()> {
             .lines()
             .map(|x| x.to_string())
             .collect();
-        let position_your_ticket = file_content.iter().position(|x| x.as_str() == "your ticket:").unwrap();
+        let position_your_ticket = file_content
+            .iter()
+            .position(|x| x.as_str() == "your ticket:")
+            .unwrap();
 
         let re_field = Regex::new(r"^([a-zA-Z0-9_ ]*): (\d+)-(\d+) or (\d+)-(\d+)$").unwrap();
         let mut fields: HashMap<String, Range> = HashMap::new();
-        for field_line in file_content[0..position_your_ticket-1].iter() {
+        for field_line in file_content[0..position_your_ticket - 1].iter() {
             if !re_field.is_match(&field_line) {
                 println!("NOPE {}", field_line);
                 continue;
             }
             let caps = re_field.captures(&field_line).unwrap();
             let name = caps.get(1).map_or("", |m| m.as_str()).to_string();
-            let numbers: Vec<usize> = (2..=5).map(|x| caps.get(x).map_or("", |m| m.as_str()).parse::<usize>().unwrap()).collect();
+            let numbers: Vec<usize> = (2..=5)
+                .map(|x| {
+                    caps.get(x)
+                        .map_or("", |m| m.as_str())
+                        .parse::<usize>()
+                        .unwrap()
+                })
+                .collect();
             fields.insert(name, Range::from_vec(&numbers));
         }
 
         let mut invalid_fields_sum = 0;
-        let position_nearby_tickets = file_content.iter().position(|x| x.as_str() == "nearby tickets:").unwrap();
-        let mut valid_tickets:Vec<Vec<usize>> = Vec::new();
-        for ticket_line in file_content[position_nearby_tickets+1..file_content.len()].iter() {
-            let ticket_fields:Vec<usize> = ticket_line.split(",").map(|x| x.parse::<usize>().unwrap()).collect();
+        let position_nearby_tickets = file_content
+            .iter()
+            .position(|x| x.as_str() == "nearby tickets:")
+            .unwrap();
+        let mut valid_tickets: Vec<Vec<usize>> = Vec::new();
+        for ticket_line in file_content[position_nearby_tickets + 1..file_content.len()].iter() {
+            let ticket_fields: Vec<usize> = ticket_line
+                .split(",")
+                .map(|x| x.parse::<usize>().unwrap())
+                .collect();
             let mut is_valid_ticket = true;
             for field_value in ticket_fields.iter() {
                 let mut is_valid_field = false;
@@ -82,7 +99,6 @@ fn main() -> io::Result<()> {
         println!("Part 1, invalid fields sum: {}", invalid_fields_sum);
         assert_eq!(invalid_fields_sum, *result_1);
 
-
         let mut columns: Vec<Vec<usize>> = Vec::new();
         for col in 0..valid_tickets[0].len() {
             let mut tmp: Vec<usize> = Vec::new();
@@ -92,7 +108,7 @@ fn main() -> io::Result<()> {
             columns.push(tmp);
         }
 
-        let keys:Vec<String> = fields.keys().cloned().collect();
+        let keys: Vec<String> = fields.keys().cloned().collect();
         let mut maybe_keys: Vec<Vec<String>> = Vec::new();
         for column in columns.iter() {
             let mut tmp: Vec<String> = Vec::new();
@@ -105,10 +121,11 @@ fn main() -> io::Result<()> {
             maybe_keys.push(tmp);
         }
 
-        let mut sorted_keys: Vec<(usize, Vec<String>)> = maybe_keys.into_iter().enumerate().collect();
+        let mut sorted_keys: Vec<(usize, Vec<String>)> =
+            maybe_keys.into_iter().enumerate().collect();
         sorted_keys.sort_by_key(|(_k, val)| val.len());
         let mut seen: HashSet<String> = HashSet::new();
-        let mut valid_keys:Vec<String> = vec!["".to_string(); columns.len()];
+        let mut valid_keys: Vec<String> = vec!["".to_string(); columns.len()];
         for (col_id, keys) in sorted_keys.iter() {
             for key in keys.iter() {
                 if !seen.contains(key) {
@@ -120,7 +137,10 @@ fn main() -> io::Result<()> {
         println!("{:?}", valid_keys);
 
         let mut product = 1;
-        let my_ticket:Vec<usize> = file_content[position_your_ticket + 1].split(",").map(|x| x.parse::<usize>().unwrap()).collect();
+        let my_ticket: Vec<usize> = file_content[position_your_ticket + 1]
+            .split(",")
+            .map(|x| x.parse::<usize>().unwrap())
+            .collect();
 
         for (key, val) in valid_keys.iter().zip(my_ticket.iter()) {
             if key.contains("departure") {
