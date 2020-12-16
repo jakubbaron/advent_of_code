@@ -101,11 +101,7 @@ fn main() -> io::Result<()> {
 
         let mut columns: Vec<Vec<usize>> = Vec::new();
         for col in 0..valid_tickets[0].len() {
-            let mut tmp: Vec<usize> = Vec::new();
-            for row in valid_tickets.iter() {
-                tmp.push(row[col]);
-            }
-            columns.push(tmp);
+            columns.push(valid_tickets.iter().map(|row| row[col]).collect());
         }
 
         let keys: Vec<String> = fields.keys().cloned().collect();
