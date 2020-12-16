@@ -10,6 +10,7 @@ struct Range {
     upper_min: usize,
     upper_max: usize,
 }
+
 impl Range {
     fn in_range(&self, number: usize) -> bool {
         (self.lower_min <= number && self.lower_max >= number)
@@ -30,6 +31,7 @@ impl Range {
         }
     }
 }
+
 fn main() -> io::Result<()> {
     let files_results = vec![
         ("test.txt", 71, 1),
@@ -99,8 +101,11 @@ fn main() -> io::Result<()> {
         println!("Part 1, invalid fields sum: {}", invalid_fields_sum);
         assert_eq!(invalid_fields_sum, *result_1);
 
+        let no_cols = valid_tickets[0].len();
+        assert!(valid_tickets.iter().all(|row| row.len() == no_cols));
+
         let mut columns: Vec<Vec<usize>> = Vec::new();
-        for col in 0..valid_tickets[0].len() {
+        for col in 0..no_cols {
             columns.push(valid_tickets.iter().map(|row| row[col]).collect());
         }
 
