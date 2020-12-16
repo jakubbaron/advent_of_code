@@ -1,6 +1,7 @@
 use std::io::{self};
 use regex::Regex;
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 struct Range {
@@ -30,9 +31,9 @@ impl Range {
 }
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 71, 1068781_u64),
-        // ("test2.txt", 51, 208),
-        ("input.txt", 18227, 5579916171823),
+        ("test.txt", 71, 1),
+        ("test2.txt", 0, 1),
+        ("input.txt", 18227, 2355350878831),
     ];
     for (f, result_1, result_2) in files_results.iter() {
         println!("{}", f);
@@ -63,7 +64,7 @@ fn main() -> io::Result<()> {
             let mut is_valid_ticket = true;
             for field_value in ticket_fields.iter() {
                 let mut is_valid_field = false;
-                for (k, range) in fields.iter() {
+                for (_, range) in fields.iter() {
                     if range.in_range(*field_value) {
                         is_valid_field = true;
                         break;
@@ -78,9 +79,57 @@ fn main() -> io::Result<()> {
                 valid_tickets.push(ticket_fields);
             }
         }
-        // let my_ticket = &file_content[position_your_ticket + 1];
         println!("Part 1, invalid fields sum: {}", invalid_fields_sum);
         assert_eq!(invalid_fields_sum, *result_1);
+
+
+        let mut columns: Vec<Vec<usize>> = Vec::new();
+        for col in 0..valid_tickets[0].len() {
+            let mut tmp: Vec<usize> = Vec::new();
+            for row in valid_tickets.iter() {
+                tmp.push(row[col]);
+            }
+            columns.push(tmp);
+        }
+
+        let keys:Vec<String> = fields.keys().cloned().collect();
+        let mut maybe_keys: Vec<Vec<String>> = Vec::new();
+        for column in columns.iter() {
+            let mut tmp: Vec<String> = Vec::new();
+            for key in keys.iter() {
+                let range = fields.get(key).unwrap();
+                if column.iter().all(|x| range.in_range(*x)) {
+                    tmp.push(key.to_string());
+                }
+            }
+            maybe_keys.push(tmp);
+        }
+
+        let mut sorted_keys: Vec<(usize, Vec<String>)> = maybe_keys.into_iter().enumerate().collect();
+        sorted_keys.sort_by_key(|(_k, val)| val.len());
+        let mut seen: HashSet<String> = HashSet::new();
+        let mut valid_keys:Vec<String> = vec!["".to_string(); columns.len()];
+        for (col_id, keys) in sorted_keys.iter() {
+            for key in keys.iter() {
+                if !seen.contains(key) {
+                    seen.insert(key.to_string());
+                    valid_keys[*col_id] = key.to_string();
+                }
+            }
+        }
+        println!("{:?}", valid_keys);
+
+        let mut product = 1;
+        let my_ticket:Vec<usize> = file_content[position_your_ticket + 1].split(",").map(|x| x.parse::<usize>().unwrap()).collect();
+
+        for (key, val) in valid_keys.iter().zip(my_ticket.iter()) {
+            if key.contains("departure") {
+                product *= val;
+            }
+        }
+        println!("Product: {}", product);
+        assert_eq!(product, *result_2)
     }
+
     Ok(())
 }
