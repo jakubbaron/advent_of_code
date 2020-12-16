@@ -75,11 +75,12 @@ fn main() -> io::Result<()> {
             .position(|x| x.as_str() == "nearby tickets:")
             .unwrap();
         let mut valid_tickets: Vec<Vec<usize>> = Vec::new();
-        for ticket_line in file_content[position_nearby_tickets + 1..file_content.len()].iter() {
-            let ticket_fields: Vec<usize> = ticket_line
-                .split(",")
-                .map(|x| x.parse::<usize>().unwrap())
-                .collect();
+        let all_tickets: Vec<Vec<usize>> = file_content
+            [position_nearby_tickets + 1..file_content.len()]
+            .iter()
+            .map(|x| x.split(",").map(|x| x.parse::<usize>().unwrap()).collect())
+            .collect();
+        for ticket_fields in all_tickets.into_iter() {
             let mut is_valid_ticket = true;
             for field_value in ticket_fields.iter() {
                 let mut is_valid_field = false;
