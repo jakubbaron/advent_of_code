@@ -47,7 +47,7 @@ fn main() -> io::Result<()> {
             .position(|x| x.as_str() == "your ticket:")
             .unwrap();
 
-        let re_field = Regex::new(r"^([a-zA-Z0-9_ ]*): (\d+)-(\d+) or (\d+)-(\d+)$").unwrap();
+        let re_field = Regex::new(r"^([a-zA-Z ]*): (\d+)-(\d+) or (\d+)-(\d+)$").unwrap();
         let mut fields: HashMap<String, Range> = HashMap::new();
         for field_line in file_content[0..position_your_ticket - 1].iter() {
             if !re_field.is_match(&field_line) {
