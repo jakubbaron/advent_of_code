@@ -109,22 +109,19 @@ fn main() -> io::Result<()> {
             columns.push(valid_tickets.iter().map(|row| row[col]).collect());
         }
 
-        let keys: Vec<String> = fields.keys().cloned().collect();
-        let mut maybe_keys: Vec<Vec<String>> = Vec::new();
-        for column in columns.iter() {
+        let mut maybe_keys: Vec<(usize, Vec<String>)> = Vec::new();
+        for (col_id, column) in columns.iter().enumerate() {
             let mut tmp: Vec<String> = Vec::new();
-            for key in keys.iter() {
-                let range = fields.get(key).unwrap();
+            for (key, range) in fields.iter() {
                 if column.iter().all(|x| range.in_range(*x)) {
                     tmp.push(key.to_string());
                 }
             }
-            maybe_keys.push(tmp);
+            maybe_keys.push((col_id, tmp));
         }
 
-        let mut sorted_keys: Vec<(usize, Vec<String>)> =
-            maybe_keys.into_iter().enumerate().collect();
-        sorted_keys.sort_by_key(|(_k, val)| val.len());
+        maybe_keys.sort_by_key(|(_k, val)| val.len());
+        let sorted_keys = maybe_keys;
 
         let mut seen: HashSet<String> = HashSet::new();
         let mut valid_keys: Vec<String> = vec!["".to_string(); columns.len()];
