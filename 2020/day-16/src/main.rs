@@ -120,6 +120,7 @@ fn main() -> io::Result<()> {
         let mut sorted_keys: Vec<(usize, Vec<String>)> =
             maybe_keys.into_iter().enumerate().collect();
         sorted_keys.sort_by_key(|(_k, val)| val.len());
+
         let mut seen: HashSet<String> = HashSet::new();
         let mut valid_keys: Vec<String> = vec!["".to_string(); columns.len()];
         for (col_id, keys) in sorted_keys.iter() {
@@ -132,17 +133,17 @@ fn main() -> io::Result<()> {
         }
         println!("{:?}", valid_keys);
 
-        let mut product = 1;
         let my_ticket: Vec<usize> = file_content[position_your_ticket + 1]
             .split(",")
             .map(|x| x.parse::<usize>().unwrap())
             .collect();
 
-        for (key, val) in valid_keys.iter().zip(my_ticket.iter()) {
-            if key.contains("departure") {
-                product *= val;
-            }
-        }
+        let product = valid_keys
+            .iter()
+            .zip(my_ticket.iter())
+            .filter(|(key, val)| key.contains("departure"))
+            .fold(1, |acc, (_, val)| val * acc);
+
         println!("Product: {}", product);
         assert_eq!(product, *result_2)
     }
