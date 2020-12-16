@@ -83,14 +83,7 @@ fn main() -> io::Result<()> {
         for ticket_fields in all_tickets.into_iter() {
             let mut is_valid_ticket = true;
             for field_value in ticket_fields.iter() {
-                let mut is_valid_field = false;
-                for (_, range) in fields.iter() {
-                    if range.in_range(*field_value) {
-                        is_valid_field = true;
-                        break;
-                    }
-                }
-                if !is_valid_field {
+                if !fields.iter().any(|(_, range)| range.in_range(*field_value)) {
                     invalid_fields_sum += field_value;
                     is_valid_ticket = false;
                 }
