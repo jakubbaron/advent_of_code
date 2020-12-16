@@ -118,12 +118,13 @@ fn main() -> io::Result<()> {
         let sorted_keys = maybe_keys;
 
         let mut seen: HashSet<String> = HashSet::new();
-        let mut valid_keys: Vec<String> = vec!["".to_string(); columns.len()];
-        for (col_id, keys) in sorted_keys.iter() {
-            for key in keys.iter() {
-                if !seen.contains(key) {
+        let mut valid_keys: Vec<String> = vec!["".to_string(); no_cols];
+        for (col_id, keys) in sorted_keys.into_iter() {
+            for key in keys.into_iter() {
+                if !seen.contains(&key) {
                     seen.insert(key.to_string());
-                    valid_keys[*col_id] = key.to_string();
+                    valid_keys[col_id] = key;
+                    break;
                 }
             }
         }
@@ -135,8 +136,8 @@ fn main() -> io::Result<()> {
             .collect();
 
         let product = valid_keys
-            .iter()
-            .zip(my_ticket.iter())
+            .into_iter()
+            .zip(my_ticket.into_iter())
             .filter(|(key, _val)| key.contains("departure"))
             .fold(1, |acc, (_, val)| val * acc);
 
