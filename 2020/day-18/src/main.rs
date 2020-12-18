@@ -57,7 +57,6 @@ fn evaluate2(characters: &Vec<char>) -> (i64, usize) {
             return (results, id);
         } else {
             let right = ch.to_digit(10).unwrap() as i64;
-            println!("Res: {}, right: {}, op: ", results, right);
             results += right;
         }
     }
