@@ -78,7 +78,12 @@ fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, mut curr
         let start = Instant::now();
         let mut new_cube: HashSet<NewPoint> = HashSet::new();
         for p in generate_empty_points(dimension, current_size).into_iter() {
-            let active = previous_cube.intersection(&p.get_neighbours()).count();
+            let mut active = 0;
+            for n in p.get_neighbours() {
+                if previous_cube.contains(&n) {
+                    active += 1;
+                }
+            }
             if previous_cube.contains(&p) {
                 if active == 2 || active == 3 {
                     new_cube.insert(p);
