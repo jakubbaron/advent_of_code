@@ -33,11 +33,7 @@ fn generate_empty_points(dimension: i32, current_size: i32, size_modifier: i32) 
     let start = Instant::now();
     let cap = 3_usize.pow(dimension as u32);
     let mut neighbours: HashSet<NewPoint> = HashSet::with_capacity(cap);
-    for i in -dimension..=dimension {
-        let mut t = vec![0; dimension as usize];
-        t[0] = i;
-        neighbours.insert(NewPoint{coords:t});
-    }
+    neighbours.insert(NewPoint{coords:vec![0; dimension as usize]});
     for d in 0..dimension {
         let mut new_set: HashSet<NewPoint> = HashSet::with_capacity(cap);
         for p in neighbours.into_iter() {
