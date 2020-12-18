@@ -72,8 +72,7 @@ fn file_content_to_new_points(file_content: &Vec<String>, dimension: usize) -> H
 
 fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, mut current_size: i32) -> usize {
     for _ in 1..=6 {
-        let cap = 3_usize.pow(dimension as u32 * current_size as u32);
-        let mut new_cube: HashSet<NewPoint> = HashSet::with_capacity(cap);
+        let mut new_cube: HashSet<NewPoint> = HashSet::new();
         for p in generate_empty_points(dimension, current_size).into_iter() {
             let active = previous_cube.intersection(&p.get_neighbours()).count();
             if previous_cube.contains(&p) {
