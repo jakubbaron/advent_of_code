@@ -5,7 +5,6 @@ fn evaluate(characters: &Vec<char>) -> (i64, usize) {
     let mut it = characters.iter();
     let mut id = 0;
     let mut operator = '+';
-    println!("{:?}", characters);
     while id < characters.len() {
         let ch = characters[id];
         id += 1;
@@ -17,12 +16,10 @@ fn evaluate(characters: &Vec<char>) -> (i64, usize) {
                 results += res;
             }
             id += offset;
-        }
-        else if ch == ')' {
-            println!("Returning: {} {}", results, id);
+        } else if ch == ')' {
+            println!("Bracket, Returning: {} {}", results, id);
             return (results, id);
-        }
-        else if ch == '*' || ch == '+' {
+        } else if ch == '*' || ch == '+' {
             operator = ch;
         } else {
             let left = ch.to_digit(10).unwrap() as i64;
@@ -42,7 +39,6 @@ fn evaluate2(characters: &Vec<char>) -> (i64, usize) {
     let mut results = 0;
     let mut id = 0;
     let mut operator = '+';
-    // println!("{:?}", characters);
     while id < characters.len() {
         let ch = characters[id];
         id += 1;
@@ -54,20 +50,26 @@ fn evaluate2(characters: &Vec<char>) -> (i64, usize) {
                 results += res;
             }
             id += offset;
-        }
-        else if ch == ')' {
-            println!("Returning: {} {}", results, id);
+        } else if ch == ')' {
+            println!("Bracket, Returning: {} {}", results, id);
             return (results, id);
-        }
-        else if ch == '*' || ch == '+' {
+        } else if ch == '*' || ch == '+' {
             operator = ch;
+            if ch == '*' {
+                println!("YO {} {}", id, results);
+                let (res, offset) = evaluate2(&characters[id..characters.len()].to_vec());
+                results *= res;
+                id += offset;
+                println!("Multi, Returning: {} {}", results, id);
+                return (results, id);
+            }
         } else {
-            let left = ch.to_digit(10).unwrap() as i64;
-            println!("Res: {}, left: {}, op: {}", results, left, operator);
+            let right = ch.to_digit(10).unwrap() as i64;
+            println!("Res: {}, right: {}, op: {}", results, right, operator);
             if operator == '*' {
-                results *= left;
+                results *= right;
             } else if operator == '+' {
-                results += left;
+                results += right;
             }
         }
     }
@@ -75,17 +77,14 @@ fn evaluate2(characters: &Vec<char>) -> (i64, usize) {
     (results, id)
 }
 
-
-// 1 + 2 * 3 + 4 * 5 + 6
-
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 71, 231),
+        ("test.txt", 71_i64, 231_i64),
         ("test2.txt", 51, 51),
         ("test3.txt", 437, 1445),
         ("test4.txt", 12240, 669060),
         ("test5.txt", 13632, 23340),
-        ("input.txt", 5019432542701, 2),
+        ("input.txt", 5019432542701, 70518821989947),
     ];
     for (f, result_1, result_2) in files_results.iter() {
         println!("{}", f);
@@ -95,12 +94,20 @@ fn main() -> io::Result<()> {
             .collect();
         let mut sum = 0;
         for line in file_content.iter() {
-            let characters:Vec<char> = line.chars().filter(|x| *x!=' ').collect();
+            let characters: Vec<char> = line.chars().filter(|x| *x != ' ').collect();
             let (res, _) = evaluate(&characters);
             sum += res;
         }
         println!("Sum: {}", sum);
         assert_eq!(sum, *result_1);
+
+        let mut sum = 0;
+        for line in file_content.iter() {
+            let characters: Vec<char> = line.chars().filter(|x| *x != ' ').collect();
+            let (res, _) = evaluate2(&characters);
+            sum += res;
+        }
+        assert_eq!(sum, *result_2);
     }
     Ok(())
 }
