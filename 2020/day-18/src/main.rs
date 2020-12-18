@@ -37,39 +37,28 @@ fn evaluate(characters: &Vec<char>) -> (i64, usize) {
 fn evaluate2(characters: &Vec<char>) -> (i64, usize) {
     let mut results = 0;
     let mut id = 0;
-    let mut operator = '+';
     while id < characters.len() {
         let ch = characters[id];
         id += 1;
         if ch == '(' {
             let (res, offset) = evaluate2(&characters[id..characters.len()].to_vec());
-            if operator == '*' {
-                results *= res;
-            } else if operator == '+' {
-                results += res;
-            }
+            results += res;
             id += offset;
         } else if ch == ')' {
             println!("Bracket, Returning: {} {}", results, id);
             return (results, id);
-        } else if ch == '*' || ch == '+' {
-            operator = ch;
-            if ch == '*' {
-                println!("YO {} {}", id, results);
-                let (res, offset) = evaluate2(&characters[id..characters.len()].to_vec());
-                results *= res;
-                id += offset;
-                println!("Multi, Returning: {} {}", results, id);
-                return (results, id);
-            }
+        } else if ch == '+' {
+            continue;
+        } else if ch == '*' {
+            let (res, offset) = evaluate2(&characters[id..characters.len()].to_vec());
+            results *= res;
+            id += offset;
+            println!("Multi, Returning: {} {}", results, id);
+            return (results, id);
         } else {
             let right = ch.to_digit(10).unwrap() as i64;
-            println!("Res: {}, right: {}, op: {}", results, right, operator);
-            if operator == '*' {
-                results *= right;
-            } else if operator == '+' {
-                results += right;
-            }
+            println!("Res: {}, right: {}, op: ", results, right);
+            results += right;
         }
     }
     println!("Returning: {} {}", results, id);
