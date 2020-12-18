@@ -2,7 +2,6 @@ use std::io::{self};
 
 fn evaluate(characters: &Vec<char>) -> (i64, usize) {
     let mut results = 0;
-    let mut it = characters.iter();
     let mut id = 0;
     let mut operator = '+';
     while id < characters.len() {
