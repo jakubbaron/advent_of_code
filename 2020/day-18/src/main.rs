@@ -75,13 +75,12 @@ fn main() -> io::Result<()> {
     ];
     for (f, result_1, result_2) in files_results.iter() {
         println!("{}", f);
-        let file_content: Vec<String> = std::fs::read_to_string(f)?
+        let file_content: Vec<Vec<char>> = std::fs::read_to_string(f)?
             .lines()
-            .map(|x| x.to_string())
+            .map(|x| x.chars().filter(|x| *x != ' ').collect())
             .collect();
         let mut sum = 0;
-        for line in file_content.iter() {
-            let characters: Vec<char> = line.chars().filter(|x| *x != ' ').collect();
+        for characters in file_content.iter() {
             let (res, _) = evaluate(&characters);
             sum += res;
         }
@@ -89,8 +88,7 @@ fn main() -> io::Result<()> {
         assert_eq!(sum, *result_1);
 
         let mut sum = 0;
-        for line in file_content.iter() {
-            let characters: Vec<char> = line.chars().filter(|x| *x != ' ').collect();
+        for characters in file_content.iter() {
             let (res, _) = evaluate2(&characters);
             sum += res;
         }
