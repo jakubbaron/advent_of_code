@@ -2,22 +2,19 @@ use std::collections::HashSet;
 use std::io::{self};
 
 #[derive(Hash, PartialEq, Eq, Clone, Debug)]
-struct Point3d {
+struct Point {
     x: i32,
     y: i32,
     z: i32,
 }
 
-impl Point3d {
-    fn get_neighbours(&self) -> Vec<Point3d> {
-        let mut neighbours: Vec<Point3d> = Vec::new();
+impl Point {
+    fn get_neighbours(&self) -> HashSet<Point> {
+        let mut neighbours: HashSet<Point> = HashSet::with_capacity(26);
         for tx in self.x - 1..=self.x + 1 {
             for ty in self.y - 1..=self.y + 1 {
                 for tz in self.z - 1..=self.z + 1 {
-                    if tx == self.x && ty == self.y && tz == self.z {
-                        continue;
-                    }
-                    neighbours.push(Point3d {
+                    neighbours.insert(Point {
                         x: tx,
                         y: ty,
                         z: tz,
@@ -25,8 +22,60 @@ impl Point3d {
                 }
             }
         }
+        neighbours.remove(self);
         neighbours
     }
+}
+
+
+#[derive(Hash, PartialEq, Eq, Clone, Debug)]
+struct NewPoint {
+    coords: Vec<i32>,
+}
+
+impl NewPoint {
+    fn get_neighbours(&self) -> HashSet<NewPoint> {
+        let cap = 3_usize.pow(self.coords.len() as u32);
+        let mut neighbours: HashSet<NewPoint> = HashSet::with_capacity(cap);
+        neighbours.insert(self.clone());
+        for dimension in 0..self.coords.len() {
+            let mut new_set: HashSet<NewPoint> = HashSet::with_capacity(cap);
+            for p in neighbours.iter() {
+                for modifier in vec![-1, 0, 1] {
+                    let mut tmp = p.clone();
+                    tmp.coords[dimension] = p.coords[dimension] + modifier;
+                    new_set.insert(tmp);
+                }
+            }
+            neighbours = new_set;
+        }
+
+        neighbours.remove(self);
+        neighbours
+    }
+}
+
+fn generate_empty_points(dimension: i32, current_size: i32) -> HashSet<NewPoint> {
+    let cap = 3_usize.pow(dimension as u32);
+    let mut neighbours: HashSet<NewPoint> = HashSet::with_capacity(cap);
+    for i in -dimension..=dimension {
+        let mut t = vec![0; dimension as usize];
+        t[0] = i;
+        neighbours.insert(NewPoint{coords:t});
+    }
+    for d in 0..dimension {
+        let mut new_set: HashSet<NewPoint> = HashSet::with_capacity(cap);
+        for p in neighbours.iter() {
+            for modifier in -current_size..=current_size {
+                let mut tmp = p.clone();
+                let d = d as usize;
+                tmp.coords[d] = p.coords[d] + modifier;
+                new_set.insert(tmp);
+            }
+        }
+        neighbours = new_set;
+    }
+    neighbours
 }
 
 #[derive(Hash, PartialEq, Eq, Clone, Debug)]
@@ -69,43 +118,32 @@ fn main() -> io::Result<()> {
             .lines()
             .map(|x| x.to_string())
             .collect();
-        let mut previous_cube: HashSet<Point3d> = HashSet::new();
+
+        let mut previous_cube: HashSet<NewPoint> = HashSet::new();
         for (y, line) in file_content.iter().enumerate() {
             for (x, ch) in line.chars().enumerate() {
                 if ch == '#' {
                     let y = y as i32;
                     let x = x as i32;
                     let z = 0_i32;
-                    previous_cube.insert(Point3d { x, y, z });
+                    previous_cube.insert(NewPoint { coords: vec![x, y, z]});
                 }
             }
         }
         println! {"{:?}", previous_cube};
         let mut current_size = file_content.len() as i32;
+        let dimension = 3_i32;
         for _ in 1..=6 {
-            let mut new_cube: HashSet<Point3d> = HashSet::new();
-            for x in -current_size..=current_size {
-                for y in -current_size..=current_size {
-                    for z in -current_size..=current_size {
-                        let x = x as i32;
-                        let y = y as i32;
-                        let z = z as i32;
-                        let p = Point3d { x, y, z };
-                        let mut active = 0;
-                        for n in p.get_neighbours().iter() {
-                            if previous_cube.contains(&n) {
-                                active += 1;
-                            }
-                        }
-                        if previous_cube.contains(&p) {
-                            if active == 2 || active == 3 {
-                                new_cube.insert(p.clone());
-                            }
-                        } else {
-                            if active == 3 {
-                                new_cube.insert(p.clone());
-                            }
-                        }
+            let mut new_cube: HashSet<NewPoint> = HashSet::new();
+            for p in generate_empty_points(dimension, current_size).iter() {
+                let active = previous_cube.intersection(&p.get_neighbours()).count();
+                if previous_cube.contains(&p) {
+                    if active == 2 || active == 3 {
+                        new_cube.insert(p.clone());
+                    }
+                } else {
+                    if active == 3 {
+                        new_cube.insert(p.clone());
                     }
                 }
             }
@@ -115,7 +153,7 @@ fn main() -> io::Result<()> {
         println!("Actives 3d {}", previous_cube.len());
         assert_eq!(previous_cube.len(), *result_1);
 
-        let mut previous_cube: HashSet<Point4d> = HashSet::new();
+        let mut previous_cube: HashSet<NewPoint> = HashSet::new();
         for (y, line) in file_content.iter().enumerate() {
             for (x, ch) in line.chars().enumerate() {
                 if ch == '#' {
@@ -123,39 +161,24 @@ fn main() -> io::Result<()> {
                     let x = x as i32;
                     let z = 0_i32;
                     let w = 0_i32;
-                    previous_cube.insert(Point4d { x, y, z, w });
+                    previous_cube.insert(NewPoint{ coords:vec![x, y, z, w] });
                 }
             }
         }
         println! {"{:?}", previous_cube};
         let mut current_size = file_content.len() as i32;
+        let dimension = 4_i32;
         for _ in 1..=6 {
-            let mut new_cube: HashSet<Point4d> = HashSet::new();
-            for x in -current_size..=current_size {
-                for y in -current_size..=current_size {
-                    for z in -current_size..=current_size {
-                        for w in -current_size..=current_size {
-                            let x = x as i32;
-                            let y = y as i32;
-                            let z = z as i32;
-                            let w = w as i32;
-                            let p = Point4d { x, y, z, w };
-                            let mut active = 0;
-                            for n in p.get_neighbours().iter() {
-                                if previous_cube.contains(&n) {
-                                    active += 1;
-                                }
-                            }
-                            if previous_cube.contains(&p) {
-                                if active == 2 || active == 3 {
-                                    new_cube.insert(p.clone());
-                                }
-                            } else {
-                                if active == 3 {
-                                    new_cube.insert(p.clone());
-                                }
-                            }
-                        }
+            let mut new_cube: HashSet<NewPoint> = HashSet::new();
+            for p in generate_empty_points(dimension, current_size).iter() {
+                let active = previous_cube.intersection(&p.get_neighbours()).count();
+                if previous_cube.contains(&p) {
+                    if active == 2 || active == 3 {
+                        new_cube.insert(p.clone());
+                    }
+                } else {
+                    if active == 3 {
+                        new_cube.insert(p.clone());
                     }
                 }
             }
