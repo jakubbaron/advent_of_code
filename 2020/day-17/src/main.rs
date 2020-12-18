@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::io::{self};
+use std::time::{Duration, Instant};
 
 #[derive(Hash, PartialEq, Eq, Clone, Debug)]
 struct NewPoint {
@@ -29,6 +30,7 @@ impl NewPoint {
 }
 
 fn generate_empty_points(dimension: i32, current_size: i32) -> HashSet<NewPoint> {
+    let start = Instant::now();
     let cap = 3_usize.pow(dimension as u32);
     let mut neighbours: HashSet<NewPoint> = HashSet::with_capacity(cap);
     for i in -dimension..=dimension {
@@ -48,6 +50,7 @@ fn generate_empty_points(dimension: i32, current_size: i32) -> HashSet<NewPoint>
         }
         neighbours = new_set;
     }
+    println!("Spent {:?} in generate_empty_points for {} {} {}", start.elapsed(), dimension, current_size, neighbours.len());
     neighbours
 }
 
@@ -72,6 +75,7 @@ fn file_content_to_new_points(file_content: &Vec<String>, dimension: usize) -> H
 
 fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, mut current_size: i32) -> usize {
     for _ in 1..=6 {
+        let start = Instant::now();
         let mut new_cube: HashSet<NewPoint> = HashSet::new();
         for p in generate_empty_points(dimension, current_size).into_iter() {
             let active = previous_cube.intersection(&p.get_neighbours()).count();
@@ -87,6 +91,7 @@ fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, mut curr
         }
         previous_cube = new_cube;
         current_size += 1;
+        println!("Spent {:?} in run_simulation for {} {}", start.elapsed(), dimension, current_size);
     }
     previous_cube.len()
 }
