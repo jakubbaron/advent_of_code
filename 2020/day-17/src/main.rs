@@ -29,7 +29,7 @@ impl NewPoint {
     }
 }
 
-fn generate_empty_points(dimension: i32, current_size: i32) -> HashSet<NewPoint> {
+fn generate_empty_points(dimension: i32, current_size: i32, size_modifier: i32) -> HashSet<NewPoint> {
     let start = Instant::now();
     let cap = 3_usize.pow(dimension as u32);
     let mut neighbours: HashSet<NewPoint> = HashSet::with_capacity(cap);
@@ -41,7 +41,7 @@ fn generate_empty_points(dimension: i32, current_size: i32) -> HashSet<NewPoint>
     for d in 0..dimension {
         let mut new_set: HashSet<NewPoint> = HashSet::with_capacity(cap);
         for p in neighbours.into_iter() {
-            for modifier in -current_size..=current_size {
+            for modifier in -(size_modifier)..=(current_size+size_modifier) {
                 let mut tmp = p.clone();
                 let d = d as usize;
                 tmp.coords[d] = p.coords[d] + modifier;
@@ -73,11 +73,12 @@ fn file_content_to_new_points(file_content: &Vec<String>, dimension: usize) -> H
     previous_cube
 }
 
-fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, mut current_size: i32) -> usize {
+fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, current_size: i32) -> usize {
+    let mut modifier = 1;
     for _ in 1..=6 {
         let start = Instant::now();
         let mut new_cube: HashSet<NewPoint> = HashSet::new();
-        for p in generate_empty_points(dimension, current_size).into_iter() {
+        for p in generate_empty_points(dimension, current_size, modifier).into_iter() {
             let mut active = 0;
             for n in p.get_neighbours() {
                 if previous_cube.contains(&n) {
@@ -95,7 +96,7 @@ fn run_simulation(mut previous_cube: HashSet<NewPoint>, dimension: i32, mut curr
             }
         }
         previous_cube = new_cube;
-        current_size += 1;
+        modifier += 1;
         println!("Spent {:?} in run_simulation for {} {}", start.elapsed(), dimension, current_size);
     }
     previous_cube.len()
