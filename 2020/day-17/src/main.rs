@@ -80,7 +80,6 @@ fn main() -> io::Result<()> {
                 }
             }
         }
-        println! {"{:?}", previous_cube};
         let mut current_size = file_content.len() as i32;
         for _ in 1..=6 {
             let mut new_cube: HashSet<Point3d> = HashSet::new();
@@ -127,7 +126,6 @@ fn main() -> io::Result<()> {
                 }
             }
         }
-        println! {"{:?}", previous_cube};
         let mut current_size = file_content.len() as i32;
         for _ in 1..=6 {
             let mut new_cube: HashSet<Point4d> = HashSet::new();
