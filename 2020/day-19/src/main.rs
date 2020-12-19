@@ -1,6 +1,6 @@
 use regex::Regex;
 use std::cell::RefCell;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::io::{self};
 
 struct Rule {
@@ -102,7 +102,6 @@ fn main() -> io::Result<()> {
             continue;
         };
 
-
         let rule_42 = format!("{}", rules.get(&42).unwrap().borrow_mut().to_regex(&rules));
         let rule_31 = format!("{}", rules.get(&31).unwrap().borrow_mut().to_regex(&rules));
         rules.insert(
@@ -112,7 +111,7 @@ fn main() -> io::Result<()> {
                 rule: Some(format!("({}+)", rule_42)),
             }),
         );
-        let mut tmp:String = format!("({}{})?", rule_42, rule_31);
+        let mut tmp: String = format!("({}{})?", rule_42, rule_31);
         for _ in 0..20 {
             tmp = format!("({}{}{})?", rule_42, tmp, rule_31);
         }
@@ -129,7 +128,7 @@ fn main() -> io::Result<()> {
             0,
             RefCell::new(Rule {
                 str_value: "8 11".to_string(),
-                rule: None
+                rule: None,
             }),
         );
 
