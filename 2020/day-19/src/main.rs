@@ -142,6 +142,35 @@ fn main() -> io::Result<()> {
             }
         }
         assert_eq!(sum, *result_2);
+
+        let regex_31 = Regex::new(&format!("^{}", rule_31)).unwrap();
+        let regex_42 = Regex::new(&format!("^{}", rule_42)).unwrap();
+
+        let mut sum = 0;
+        for line in file_content[start + 1..file_content.len()].iter() {
+            if !regex_42.is_match(&line) {
+                continue;
+            }
+            let mut counter_42 = 0;
+            let mut rest = line.to_string();
+            while regex_42.is_match(&rest) {
+                counter_42 += 1;
+                let caps = regex_42.captures(&rest).unwrap();
+                rest = rest.replacen(&caps.get(0).map_or("", |m| m.as_str()).to_string(), "", 1);
+            }
+
+            let mut counter_31 = 0;
+            while regex_31.is_match(&rest) {
+                counter_31 += 1;
+                let caps = regex_31.captures(&rest).unwrap();
+                rest = rest.replacen(&caps.get(0).map_or("", |m| m.as_str()).to_string(), "", 1);
+            }
+            if counter_42 > counter_31 && counter_31 > 0 && rest.is_empty() {
+                sum += 1;
+            }
+        }
+        assert_eq!(sum, *result_2);
     }
+
     Ok(())
 }
