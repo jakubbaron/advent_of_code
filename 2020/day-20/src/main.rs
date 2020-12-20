@@ -22,8 +22,6 @@ struct Frame {
 #[derive(Hash, PartialEq, Eq, Clone, Debug)]
 struct Neighbour {
     frame_no: usize,
-    side: Side,
-    flipped: bool,
 }
 
 fn get_bottom(data: &Vec<Vec<char>>) -> Vec<char> {
@@ -109,16 +107,12 @@ impl Frame {
                         side,
                         Neighbour {
                             frame_no: neighbour.frame_no,
-                            side: match_side.clone(),
-                            flipped: false,
                         },
                     );
                     neighbour.add_neighbour(
                         match_side,
                         Neighbour {
                             frame_no: self.frame_no,
-                            side: side.clone(),
-                            flipped: false,
                         },
                     );
                     return true;
@@ -129,16 +123,12 @@ impl Frame {
                         side,
                         Neighbour {
                             frame_no: neighbour.frame_no,
-                            side: match_side.clone(),
-                            flipped: true,
                         },
                     );
                     neighbour.add_neighbour(
                         match_side,
                         Neighbour {
                             frame_no: self.frame_no,
-                            side: side.clone(),
-                            flipped: true,
                         },
                     );
                     return true;
@@ -222,7 +212,7 @@ impl Frame {
         }
     }
 }
-fn draw_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, Vec<Vec<char>>) {
+fn find_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, Vec<Vec<char>>) {
     let mut picture_has_monster = false;
     let mut data_with_monster: Vec<Vec<char>> = end_data.to_vec();
     let monster_row_len = monster[0].len();
@@ -285,35 +275,33 @@ fn draw_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
     (picture_has_monster, data_with_monster)
 }
 
+fn draw_picture(data: &Vec<Vec<char>>) {
+    for row in data.iter() {
+        println!("{}", row.iter().collect::<String>());
+    }
+}
+
+fn measure_roughness(data: &Vec<Vec<char>>) -> usize {
+    data.iter().fold(0, |acc, row| {
+        acc + row.iter().filter(|&x| *x == '#').count()
+    })
+}
+
 fn check_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> usize {
     let mut end_data = end_data.to_vec();
     let mut res_2 = 0;
     for _ in 0..4 {
-        let (picture_has_monster, data_with_monster) = draw_monsters(&end_data, &monster);
+        let (picture_has_monster, data_with_monster) = find_monsters(&end_data, &monster);
         if picture_has_monster {
-            for row in data_with_monster.iter() {
-                for ch in row.iter() {
-                    print!("{}", ch);
-                    if *ch == '#' {
-                        res_2 += 1;
-                    }
-                }
-                println!("");
-            }
+            draw_picture(&data_with_monster);
+            res_2 = measure_roughness(&data_with_monster);
             break;
         }
         let flipped_data = flip(&end_data);
-        let (picture_has_monster, data_with_monster) = draw_monsters(&flipped_data, &monster);
+        let (picture_has_monster, data_with_monster) = find_monsters(&flipped_data, &monster);
         if picture_has_monster {
-            for row in data_with_monster.iter() {
-                for ch in row.iter() {
-                    print!("{}", ch);
-                    if *ch == '#' {
-                        res_2 += 1;
-                    }
-                }
-                println!("");
-            }
+            draw_picture(&data_with_monster);
+            res_2 = measure_roughness(&data_with_monster);
             break;
         }
 
@@ -357,12 +345,10 @@ fn main() -> io::Result<()> {
                 frame_1.try_neighbour(&mut frame_2);
             }
         }
-        let mut res_1 = 1;
-        for frame in frames.values() {
-            if frame.borrow().neighbours.len() == 2 {
-                res_1 *= frame.borrow().frame_no;
-            }
-        }
+        let res_1 = frames
+            .values()
+            .filter(|x| x.borrow().neighbours.len() == 2)
+            .fold(1, |acc, frame| acc * frame.borrow().frame_no);
         assert_eq!(res_1, *result_1);
 
         let mut first_corner: Option<Frame> = None;
@@ -453,6 +439,9 @@ fn main() -> io::Result<()> {
             Some(f) => f.data_without_borders().len(),
             None => 0,
         };
+        if data_size == 0 {
+            panic!("No data after removing borders!!");
+        }
 
         let mut end_data: Vec<Vec<char>> =
             vec![vec!['.'; row_len * data_size]; col_len * data_size];
