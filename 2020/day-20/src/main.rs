@@ -23,7 +23,50 @@ struct Frame {
     frame_no: usize,
     data: Vec<Vec<char>>,
     sides: HashMap<Side, Vec<char>>,
-    neighbours: HashSet<Side>,
+    neighbours: HashMap<Side, Neighbour>,
+}
+
+#[derive(Hash)]
+#[derive(PartialEq)]
+#[derive(Eq)]
+#[derive(Clone)]
+#[derive(Debug)]
+struct Neighbour {
+    frame_no: usize,
+    side: Side,
+    flipped: bool,
+}
+
+fn get_bottom(data: &Vec<Vec<char>>) -> Vec<char> {
+    data[data.len()-1].to_vec()
+}
+fn get_top(data: &Vec<Vec<char>>) -> Vec<char> {
+    data[0].to_vec()
+}
+fn get_left(data: &Vec<Vec<char>>) -> Vec<char> {
+    data.iter().map(|row| row[0]).collect()
+}
+fn get_right(data: &Vec<Vec<char>>) -> Vec<char> {
+    data.iter().map(|row| row[data.len() - 1]).collect()
+}
+fn rotate(data: &Vec<Vec<char>>) -> Vec<Vec<char>> {
+    let mut new_data: Vec<Vec<char>> = vec![vec!['.'; data.len()]; data[0].len()];
+    for i in 0..data.len() {
+        for j in 0..data[i].len() {
+            new_data[i][j] = data[data.len()-j-1][i];
+        }
+    }
+    new_data
+}
+
+fn flip(data: &Vec<Vec<char>>) -> Vec<Vec<char>> {
+    let mut new_data: Vec<Vec<char>> = vec![vec!['.'; data.len()]; data[0].len()];
+    for i in 0..data.len() {
+        for j in 0..data.len() {
+            new_data[i][j] = data[i][data.len() - j - 1];
+        }
+    }
+    new_data
 }
 
 impl Frame {
@@ -34,11 +77,12 @@ impl Frame {
         let tmp:Vec<&str> = title.split(" ").collect();
         let frame_no = tmp[1].replace(":", " ").trim().parse::<usize>().unwrap();
         let data = vec[1..vec.len()].to_vec();
-
-        let bottom = data[data.len()-1].to_vec();
-        let top = data[0].to_vec();
-        let left:Vec<char> = data.iter().map(|row| row[0]).collect();
-        let right :Vec<char> = data.iter().map(|row| row[data.len() - 1]).collect();
+        assert_eq!(data.len(), 10);
+        assert_eq!(data[0].len(), 10);
+        let bottom = get_bottom(&data);
+        let top = get_top(&data);
+        let left = get_left(&data);
+        let right = get_right(&data);
         let sides: HashMap<Side, Vec<char>> = vec![
             (Side::Bottom, bottom),
             (Side::Top, top),
@@ -50,54 +94,200 @@ impl Frame {
             frame_no,
             data,
             sides,
-            neighbours: HashSet::new(),
+            neighbours: HashMap::new(),
         }
     }
-    fn try_neighbour(&mut self, mut neighbour: &mut Frame) -> bool {
+
+    fn try_neighbour(&mut self, neighbour: &mut Frame) -> bool {
         if self.neighbours.len() == 4 || neighbour.neighbours.len() == 4 {
             return false;
         }
         let sides = vec![Side::Left, Side::Right, Side::Bottom, Side::Top];
         for side in sides.iter() {
-            if self.neighbours.contains(side) {
+            if self.neighbours.contains_key(side) {
                 continue;
             }
             for match_side in sides.iter() {
-                if neighbour.neighbours.contains(match_side) {
+                if neighbour.neighbours.contains_key(match_side) {
                     continue;
                 }
                 let their_side = neighbour.sides.get(match_side).unwrap();
                 let frame_side = self.sides.get(side).unwrap();
-                // println!("Side 1 {:?}",frame_side);
-                // println!("side {:?} match_side {:?}", side, match_side);
-                // println!("Side 2 {:?}",their_side);
                 if frame_side == their_side {
-                    println!("Matching {} with {}", self.frame_no, neighbour.frame_no);
-                    println!("{:?} {:?}", frame_side, their_side);
-                    self.add_neighbour(side);
-                    neighbour.add_neighbour(match_side);
+                    self.add_neighbour(side, Neighbour{frame_no:neighbour.frame_no, side:match_side.clone(), flipped:false});
+                    neighbour.add_neighbour(match_side, Neighbour{frame_no:self.frame_no,side:side.clone(), flipped:false});
                     return true;
                 }
                 let reverse:Vec<char> = their_side.to_vec().into_iter().rev().collect();
                 if frame_side == &reverse {
-                    println!("Matching {} with {}", self.frame_no, neighbour.frame_no);
-                    println!("{:?} {:?}", frame_side, their_side);
-                    self.add_neighbour(side);
-                    neighbour.add_neighbour(match_side);
+                    self.add_neighbour(side, Neighbour{frame_no:neighbour.frame_no, side:match_side.clone(), flipped:true});
+                    neighbour.add_neighbour(match_side, Neighbour{frame_no:self.frame_no,side:side.clone(), flipped:true});
                     return true;
                 }
             }
         }
         return false
     }
-    fn add_neighbour(&mut self, side: &Side) {
-        self.neighbours.insert(side.clone());
+
+    fn data_without_borders(&self) -> Vec<Vec<char>> {
+        // let tmp:Vec<Vec<char>> = Vec::new();
+        // for row in self.data[1..self.data.len()-1].iter() {
+        //     tmp.push(row[1..row.len()-1].to_vec());
+        // }
+        self.data[1..self.data.len()-1].iter().map(|row| row[1..row.len()-1].to_vec()).collect()
     }
+    fn add_neighbour(&mut self, side: &Side, neighbour: Neighbour) {
+        self.neighbours.insert(side.clone(), neighbour);
+    }
+
+    fn flip(&self) -> Frame {
+        let new_data = flip(&self.data);
+        let bottom = get_bottom(&new_data);
+        let top = get_top(&new_data);
+        let left = get_left(&new_data);
+        let right = get_right(&new_data);
+        let sides: HashMap<Side, Vec<char>> = vec![
+            (Side::Bottom, bottom),
+            (Side::Top, top),
+            (Side::Left, left),
+            (Side::Right, right),
+        ].into_iter().collect();
+        let mut new_neighbours: HashMap<Side, Neighbour> = HashMap::new();
+        for (k, n) in self.neighbours.iter() {
+            let new_side = match k {
+                Side::Right => Side::Left,
+                Side::Left => Side::Right,
+                _ => k.clone(),
+            };
+            new_neighbours.insert(new_side, n.clone());
+        }
+        Frame {
+            title: self.title.to_string(),
+            frame_no: self.frame_no,
+            data: new_data,
+            sides,
+            neighbours: new_neighbours,
+        }
+    }
+    fn rotate(&self) -> Frame {
+        let new_data = rotate(&self.data);
+        let bottom = get_bottom(&new_data);
+        let top = get_top(&new_data);
+        let left = get_left(&new_data);
+        let right = get_right(&new_data);
+        let sides: HashMap<Side, Vec<char>> = vec![
+            (Side::Bottom, bottom),
+            (Side::Top, top),
+            (Side::Left, left),
+            (Side::Right, right),
+        ].into_iter().collect();
+        let mut new_neighbours: HashMap<Side, Neighbour> = HashMap::new();
+        for (k, n) in self.neighbours.iter() {
+            let new_side = match k {
+                Side::Top => Side::Right,
+                Side::Right => Side::Bottom,
+                Side::Bottom => Side::Left,
+                Side::Left => Side::Top,
+            };
+            new_neighbours.insert(new_side, n.clone());
+        }
+        Frame {
+            title: self.title.to_string(),
+            frame_no: self.frame_no,
+            data: new_data,
+            sides,
+            neighbours: new_neighbours,
+        }
+    }
+}
+fn draw_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, Vec<Vec<char>>) {
+    let mut picture_has_monster = false;
+    let mut data_with_monster :Vec<Vec<char>> = end_data.to_vec();
+    let monster_row_len = monster[0].len();
+    let mut row_id = 0;
+    while row_id < end_data.len() - monster.len() {
+        let mut col_id = 0;
+        let mut found_monster_window = false;
+        while col_id < end_data[0].len()-monster_row_len {
+            let mut found_monster = false;
+            for (monster_row, row) in monster.iter().zip(end_data[row_id..row_id+monster.len()].iter()) {
+                for (monster_ch, ch) in monster_row.iter().zip(row[col_id..col_id+monster_row_len].iter()) {
+                    if *monster_ch == '#' && *ch =='#' {
+                        found_monster = true;
+                    } else if *monster_ch == '#' && *ch != '#' {
+                        found_monster = false;
+                        break;
+                    }
+                }
+                if !found_monster {
+                    break;
+                }
+            }
+            if found_monster {
+                for (row_offset, (monster_row, row)) in monster.iter().zip(end_data[row_id..row_id+monster.len()].iter()).enumerate() {
+                    for (col_offset, (monster_ch, ch)) in monster_row.iter().zip(row[col_id..col_id+monster_row_len].iter()).enumerate() {
+                        if *monster_ch == '#' && *ch =='#' {
+                            data_with_monster[row_id + row_offset][col_id + col_offset] = 'O';
+                        }
+                    }
+                }
+                found_monster_window = true;
+                picture_has_monster = true;
+                break;
+            }
+            col_id += 1;
+            if found_monster_window {
+                break;
+            }
+        }
+        if found_monster_window {
+            row_id += 3;
+        } else {
+            row_id += 1;
+        }
+    }
+    (picture_has_monster, data_with_monster)
+}
+
+fn check_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> usize {
+    let mut end_data = end_data.to_vec();
+    let mut res_2 = 0;
+    for _ in 0..4 {
+        let (picture_has_monster, data_with_monster) = draw_monsters(&end_data, &monster);
+        if picture_has_monster {
+            for row in data_with_monster.iter() {
+                for ch in row.iter() {
+                    print!("{}", ch);
+                    if *ch == '#' {
+                        res_2 += 1;
+                    }
+                }
+                println!("");
+            }
+            break;
+        }
+        let flipped_data = flip(&end_data);
+        let (picture_has_monster, data_with_monster) = draw_monsters(&flipped_data, &monster);
+        if picture_has_monster {
+            for row in data_with_monster.iter() {
+                for ch in row.iter() {
+                    print!("{}", ch);
+                    if *ch == '#' {
+                        res_2 += 1;
+                    }
+                }
+                println!("");
+            }
+            break;
+        }
+        end_data = rotate(&end_data);
+    }
+    res_2
 }
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 20899048083289_usize, 1),
-        ("input.txt", 20913499394191, 1),
+        ("test.txt", 20899048083289_usize, 273),
+        ("input.txt", 20913499394191, 2269),
 
     ];
     for (f, result_1, result_2) in files_results.iter() {
@@ -128,18 +318,126 @@ fn main() -> io::Result<()> {
                 }
                 let key_2 = &keys[j];
                 let mut frame_2 = frames.get(key_2).unwrap().borrow_mut();
-                // println!("Trying to match {} {}", frame_1.frame_no, frame_2.frame_no);
                 frame_1.try_neighbour(&mut frame_2);
             }
         }
         let mut res_1 = 1;
         for frame in frames.values() {
-            println!("{} {:?}", frame.borrow().frame_no, frame.borrow().neighbours);
             if frame.borrow().neighbours.len() == 2 {
                 res_1*=frame.borrow().frame_no;
             }
         }
         assert_eq!(res_1, *result_1);
-    }
+
+        let mut first_corner: Option<Frame> = None;
+        for frame in frames.values() {
+            let mut frame = frame.borrow().clone();
+            if frame.neighbours.len() == 2 {
+                while !frame.neighbours.contains_key(&Side::Bottom) || !frame.neighbours.contains_key(&Side::Right) {
+                    frame = frame.rotate();
+                }
+                first_corner = Some(frame.clone());
+            }
+        }
+        let first_corner = first_corner.unwrap().clone();
+
+        println!("{:?}", first_corner);
+        let directions: Vec<Side> = first_corner.neighbours.keys().cloned().collect();
+        let mut queue: Vec<(Frame, usize, usize)> = vec![(first_corner, 0, 0)];
+        let mut seen: HashSet<usize> = HashSet::new();
+        let sq_size = (frames.len() as f64).sqrt() as usize;
+        let mut end_vec: Vec<Vec<Option<Frame>>> = vec![vec![None; sq_size]; sq_size];
+        while queue.len() > 0 {
+            let (current, i, j) = queue.pop().unwrap();
+            if seen.contains(&current.frame_no) {
+                continue;
+            }
+            end_vec[i][j] = Some(current.clone());
+            seen.insert(current.frame_no);
+            // println!("Current: {:?}", current.frame_no);
+            for dir in directions.iter() {
+                if !current.neighbours.contains_key(&dir){
+                    // println!("Frame: {} doesn't have {:?}", current.frame_no, dir);
+                    continue;
+                }
+                let neigh_no = current.neighbours.get(&dir).unwrap().frame_no;
+                if seen.contains(&neigh_no) {
+                    continue;
+                }
+                // println!("neigh_no: {:?}", neigh_no);
+                let neigh = frames.get(&neigh_no).unwrap().borrow();
+                let mut neigh = neigh.clone();
+                let my_side = current.sides.get(&dir).unwrap();
+                let other_direction = match dir {
+                    Side::Right => Side::Left,
+                    Side::Bottom => Side::Top,
+                    Side::Left => Side::Right,
+                    Side::Top => Side::Bottom,
+                };
+                let mut found = false;
+                for _ in 0..4 {
+                    let other_side = neigh.sides.get(&other_direction).unwrap();
+                    if other_side == my_side {
+                        found = true;
+                        break;
+                    }
+                    let flipped = neigh.flip();
+                    let flipped_side = flipped.sides.get(&other_direction).unwrap();
+                    if flipped_side == my_side {
+                        neigh = flipped;
+                        found = true;
+                        break;
+                    }
+                    neigh = neigh.rotate();
+                }
+                if !found {
+                    continue;
+                }
+                if dir == &Side::Bottom {
+                    queue.push((neigh, i + 1, j));
+                } else {
+                    queue.push((neigh, i, j + 1));
+                }
+            }
+        }
+        for row in end_vec.iter() {
+            for f in row.iter() {
+                match f {
+                    Some(f) => print!("{}, ", f.frame_no),
+                    None => (),
+                };
+            }
+            println!("");
+        }
+
+        let row_len = end_vec.first().unwrap().len();
+        let col_len = end_vec.len();
+        let data_size = match &end_vec[0][0] {
+            Some(f) => f.data_without_borders().len(),
+            None => 0,
+        };
+
+        let mut end_data:Vec<Vec<char>> = vec![vec!['.'; row_len * data_size]; col_len * data_size];
+        for (i, row) in end_vec.iter().enumerate() {
+            for (j, f) in row.iter().enumerate() {
+                match f {
+                    Some(f) => {
+                        for (ii, data_row) in f.data_without_borders().iter().enumerate() {
+                            for (jj, ch) in data_row.iter().enumerate() {
+                                end_data[i * data_size + ii][j * data_size + jj] = *ch;
+                            }
+                        }
+                    },
+                    None => (),
+                };
+            }
+        }
+        let monster: Vec<Vec<char>> = std::fs::read_to_string("monster.txt")?
+            .lines()
+            .map(|x| x.chars().collect())
+            .collect();
+        let res_2 = check_monsters(&end_data, &monster);
+        assert_eq!(res_2, *result_2);
+        }
     Ok(())
 }
