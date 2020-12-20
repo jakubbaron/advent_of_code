@@ -427,7 +427,7 @@ fn main() -> io::Result<()> {
             for f in row.iter() {
                 match f {
                     Some(f) => print!("{}, ", f.frame_no),
-                    None => (),
+                    None => panic!("Not a full frame!"),
                 };
             }
             println!("");
@@ -437,11 +437,8 @@ fn main() -> io::Result<()> {
         let col_len = end_vec.len();
         let data_size = match &end_vec[0][0] {
             Some(f) => f.data_without_borders().len(),
-            None => 0,
+            None => panic!("Empty data!"),
         };
-        if data_size == 0 {
-            panic!("No data after removing borders!!");
-        }
 
         let mut end_data: Vec<Vec<char>> =
             vec![vec!['.'; row_len * data_size]; col_len * data_size];
@@ -455,7 +452,7 @@ fn main() -> io::Result<()> {
                             }
                         }
                     }
-                    None => (),
+                    None => panic!("Empty place in the picture!"),
                 };
             }
         }
