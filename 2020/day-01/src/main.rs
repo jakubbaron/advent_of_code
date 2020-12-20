@@ -20,7 +20,7 @@ fn main() -> io::Result<()> {
     let mut vec = vec;
     vec.sort();
     let target_sum = 2020;
-    for (i, el) in vec.iter().enumerate() {
+    'outer: for (i, el) in vec.iter().enumerate() {
         let mut right = vec.len() - 1;
         let mut left = i + 1;
         while left < right {
@@ -30,14 +30,13 @@ fn main() -> io::Result<()> {
             if summed == target_sum {
                 assert_eq!(288756720, right_el * left_el * el);
                 println!("{}", right_el * left_el * el);
-                break;
+                break 'outer;
             } else if summed < target_sum {
                 left += 1;
             } else if summed > target_sum {
                 right -= 1;
             } else {
-                println!("NOPE");
-                break;
+                panic!("NOPE");
             }
         }
     }
