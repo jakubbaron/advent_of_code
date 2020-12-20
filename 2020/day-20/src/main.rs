@@ -359,7 +359,7 @@ fn main() -> io::Result<()> {
                 let other_direction = match dir {
                     Side::Right => Side::Left,
                     Side::Bottom => Side::Top,
-                    _ => continue,
+                    _ => panic!("Not the sides we want"),
                 };
                 let mut neigh: Frame = frames.get(&neigh_no).unwrap().borrow().clone();
                 let mut found = false;
