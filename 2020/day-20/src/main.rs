@@ -56,6 +56,21 @@ fn flip(data: &Vec<Vec<char>>) -> Vec<Vec<char>> {
     new_data
 }
 
+fn get_sides(data: &Vec<Vec<char>>) -> HashMap<Side, Vec<char>> {
+   let bottom = get_bottom(&data);
+   let top = get_top(&data);
+   let left = get_left(&data);
+   let right = get_right(&data);
+   vec![
+       (Side::Bottom, bottom),
+       (Side::Top, top),
+       (Side::Left, left),
+       (Side::Right, right),
+   ]
+   .into_iter()
+   .collect()
+}
+
 impl Frame {
     fn new(vec: &Vec<Vec<char>>) -> Frame {
         assert!(vec.len() > 2);
@@ -66,18 +81,7 @@ impl Frame {
         let data = vec[1..vec.len()].to_vec();
         assert_eq!(data.len(), 10);
         assert_eq!(data[0].len(), 10);
-        let bottom = get_bottom(&data);
-        let top = get_top(&data);
-        let left = get_left(&data);
-        let right = get_right(&data);
-        let sides: HashMap<Side, Vec<char>> = vec![
-            (Side::Bottom, bottom),
-            (Side::Top, top),
-            (Side::Left, left),
-            (Side::Right, right),
-        ]
-        .into_iter()
-        .collect();
+        let sides = get_sides(&data);
         Frame {
             title,
             frame_no,
@@ -150,18 +154,7 @@ impl Frame {
 
     fn flip(&self) -> Frame {
         let new_data = flip(&self.data);
-        let bottom = get_bottom(&new_data);
-        let top = get_top(&new_data);
-        let left = get_left(&new_data);
-        let right = get_right(&new_data);
-        let sides: HashMap<Side, Vec<char>> = vec![
-            (Side::Bottom, bottom),
-            (Side::Top, top),
-            (Side::Left, left),
-            (Side::Right, right),
-        ]
-        .into_iter()
-        .collect();
+        let sides = get_sides(&new_data);
         let mut new_neighbours: HashMap<Side, Neighbour> = HashMap::new();
         for (k, n) in self.neighbours.iter() {
             let new_side = match k {
@@ -181,18 +174,7 @@ impl Frame {
     }
     fn rotate(&self) -> Frame {
         let new_data = rotate(&self.data);
-        let bottom = get_bottom(&new_data);
-        let top = get_top(&new_data);
-        let left = get_left(&new_data);
-        let right = get_right(&new_data);
-        let sides: HashMap<Side, Vec<char>> = vec![
-            (Side::Bottom, bottom),
-            (Side::Top, top),
-            (Side::Left, left),
-            (Side::Right, right),
-        ]
-        .into_iter()
-        .collect();
+        let sides = get_sides(&new_data);
         let mut new_neighbours: HashMap<Side, Neighbour> = HashMap::new();
         for (k, n) in self.neighbours.iter() {
             let new_side = match k {
