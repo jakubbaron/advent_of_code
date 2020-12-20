@@ -203,7 +203,7 @@ fn find_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
         let mut col_id = 0;
         while col_id < end_data[0].len() - monster_row_len {
             let mut found_monster = true;
-            for (monster_row, row) in monster
+            'monster_window: for (monster_row, row) in monster
                 .iter()
                 .zip(end_data[row_id..row_id + monster.len()].iter())
             {
@@ -213,11 +213,8 @@ fn find_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
                 {
                     if *monster_ch == '#' && *ch != '#' {
                         found_monster = false;
-                        break;
+                        break 'monster_window;
                     }
-                }
-                if !found_monster {
-                    break;
                 }
             }
             if found_monster {
@@ -350,10 +347,8 @@ fn main() -> io::Result<()> {
                 continue;
             }
             seen.insert(current.frame_no);
-            // println!("Current: {:?}", current.frame_no);
             for dir in directions.iter() {
                 if !current.neighbours.contains_key(&dir) {
-                    // println!("Frame: {} doesn't have {:?}", current.frame_no, dir);
                     continue;
                 }
                 let neigh_no = current.neighbours.get(&dir).unwrap().frame_no;
