@@ -84,9 +84,9 @@ fn main() -> io::Result<()> {
         let mut modifier = 1;
         for _ in 1..=6 {
             let mut new_cube: HashSet<Point3d> = HashSet::new();
-            for x in -modifier..=(current_size+modifier) {
+            for x in -modifier..=(current_size + modifier) {
                 for y in -modifier..=(current_size + modifier) {
-                    for z in -modifier..=(current_size+modifier) {
+                    for z in -modifier..=(current_size + modifier) {
                         let x = x as i32;
                         let y = y as i32;
                         let z = z as i32;
@@ -110,7 +110,7 @@ fn main() -> io::Result<()> {
                 }
             }
             previous_cube = new_cube;
-            modifier+= 1;
+            modifier += 1;
         }
         println!("Actives 3d {}", previous_cube.len());
         assert_eq!(previous_cube.len(), *result_1);
@@ -131,10 +131,10 @@ fn main() -> io::Result<()> {
         let mut modifier = 1;
         for _ in 1..=6 {
             let mut new_cube: HashSet<Point4d> = HashSet::new();
-            for x in -modifier..=(current_size+modifier) {
-                for y in -modifier..=(current_size+modifier) {
-                    for z in -modifier..=(current_size+modifier) {
-                        for w in -modifier..=(current_size+modifier) {
+            for x in -modifier..=(current_size + modifier) {
+                for y in -modifier..=(current_size + modifier) {
+                    for z in -modifier..=(current_size + modifier) {
+                        for w in -modifier..=(current_size + modifier) {
                             let x = x as i32;
                             let y = y as i32;
                             let z = z as i32;

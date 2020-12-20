@@ -1,6 +1,8 @@
-use day_20::{check_monsters, match_neighbours, Frame, create_picture, print_picture, frames_to_picture};
+use day_20::{
+    check_monsters, create_picture, frames_to_picture, match_neighbours, print_picture, Frame,
+};
 use std::cell::RefCell;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::io::{self};
 
 fn main() -> io::Result<()> {

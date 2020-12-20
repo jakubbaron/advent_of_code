@@ -168,7 +168,6 @@ impl Frame {
         }
     }
 
-
     fn try_neighbour(&mut self, neighbour: &mut Frame) -> bool {
         if self.neighbours.len() == 4 || neighbour.neighbours.len() == 4 {
             return false;
@@ -302,18 +301,18 @@ pub fn match_neighbours(frames: &HashMap<usize, RefCell<Frame>>) {
 }
 
 fn find_top_left_corner(frames: &HashMap<usize, RefCell<Frame>>) -> Frame {
-   let mut first_corner: Option<Frame> = None;
-   for frame in frames.values() {
-       let frame = frame.borrow();
-       if frame.get_neighbours_len() == 2 {
-           let mut frame = frame.clone();
-           while !frame.is_top_left() {
-               frame = frame.rotate();
-           }
-           first_corner = Some(frame.clone());
-       }
-   }
-   first_corner.unwrap()
+    let mut first_corner: Option<Frame> = None;
+    for frame in frames.values() {
+        let frame = frame.borrow();
+        if frame.get_neighbours_len() == 2 {
+            let mut frame = frame.clone();
+            while !frame.is_top_left() {
+                frame = frame.rotate();
+            }
+            first_corner = Some(frame.clone());
+        }
+    }
+    first_corner.unwrap()
 }
 
 pub fn create_picture(frames: &HashMap<usize, RefCell<Frame>>) -> Vec<Vec<Option<Frame>>> {
@@ -390,8 +389,7 @@ pub fn frames_to_picture(end_vec: Vec<Vec<Option<Frame>>>) -> Vec<Vec<char>> {
         None => panic!("Empty data!"),
     };
 
-    let mut end_data: Vec<Vec<char>> =
-        vec![vec!['.'; row_len * data_size]; col_len * data_size];
+    let mut end_data: Vec<Vec<char>> = vec![vec!['.'; row_len * data_size]; col_len * data_size];
     for (i, row) in end_vec.into_iter().enumerate() {
         for (j, f) in row.into_iter().enumerate() {
             match f {
