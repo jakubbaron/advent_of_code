@@ -1,12 +1,8 @@
-use std::io::{self};
-use std::collections::{HashMap, HashSet};
 use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
+use std::io::{self};
 
-#[derive(Hash)]
-#[derive(PartialEq)]
-#[derive(Eq)]
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(Hash, PartialEq, Eq, Clone, Debug)]
 enum Side {
     Bottom,
     Top,
@@ -14,10 +10,7 @@ enum Side {
     Right,
 }
 
-#[derive(PartialEq)]
-#[derive(Eq)]
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 struct Frame {
     title: String,
     frame_no: usize,
@@ -26,11 +19,7 @@ struct Frame {
     neighbours: HashMap<Side, Neighbour>,
 }
 
-#[derive(Hash)]
-#[derive(PartialEq)]
-#[derive(Eq)]
-#[derive(Clone)]
-#[derive(Debug)]
+#[derive(Hash, PartialEq, Eq, Clone, Debug)]
 struct Neighbour {
     frame_no: usize,
     side: Side,
@@ -38,7 +27,7 @@ struct Neighbour {
 }
 
 fn get_bottom(data: &Vec<Vec<char>>) -> Vec<char> {
-    data[data.len()-1].to_vec()
+    data[data.len() - 1].to_vec()
 }
 fn get_top(data: &Vec<Vec<char>>) -> Vec<char> {
     data[0].to_vec()
@@ -53,7 +42,7 @@ fn rotate(data: &Vec<Vec<char>>) -> Vec<Vec<char>> {
     let mut new_data: Vec<Vec<char>> = vec![vec!['.'; data.len()]; data[0].len()];
     for i in 0..data.len() {
         for j in 0..data[i].len() {
-            new_data[i][j] = data[data.len()-j-1][i];
+            new_data[i][j] = data[data.len() - j - 1][i];
         }
     }
     new_data
@@ -74,7 +63,7 @@ impl Frame {
         assert!(vec.len() > 2);
         assert!(vec[0].len() > 2);
         let title: String = vec[0].iter().collect();
-        let tmp:Vec<&str> = title.split(" ").collect();
+        let tmp: Vec<&str> = title.split(" ").collect();
         let frame_no = tmp[1].replace(":", " ").trim().parse::<usize>().unwrap();
         let data = vec[1..vec.len()].to_vec();
         assert_eq!(data.len(), 10);
@@ -88,7 +77,9 @@ impl Frame {
             (Side::Top, top),
             (Side::Left, left),
             (Side::Right, right),
-        ].into_iter().collect();
+        ]
+        .into_iter()
+        .collect();
         Frame {
             title,
             frame_no,
@@ -114,27 +105,54 @@ impl Frame {
                 let their_side = neighbour.sides.get(match_side).unwrap();
                 let frame_side = self.sides.get(side).unwrap();
                 if frame_side == their_side {
-                    self.add_neighbour(side, Neighbour{frame_no:neighbour.frame_no, side:match_side.clone(), flipped:false});
-                    neighbour.add_neighbour(match_side, Neighbour{frame_no:self.frame_no,side:side.clone(), flipped:false});
+                    self.add_neighbour(
+                        side,
+                        Neighbour {
+                            frame_no: neighbour.frame_no,
+                            side: match_side.clone(),
+                            flipped: false,
+                        },
+                    );
+                    neighbour.add_neighbour(
+                        match_side,
+                        Neighbour {
+                            frame_no: self.frame_no,
+                            side: side.clone(),
+                            flipped: false,
+                        },
+                    );
                     return true;
                 }
-                let reverse:Vec<char> = their_side.to_vec().into_iter().rev().collect();
+                let reverse: Vec<char> = their_side.to_vec().into_iter().rev().collect();
                 if frame_side == &reverse {
-                    self.add_neighbour(side, Neighbour{frame_no:neighbour.frame_no, side:match_side.clone(), flipped:true});
-                    neighbour.add_neighbour(match_side, Neighbour{frame_no:self.frame_no,side:side.clone(), flipped:true});
+                    self.add_neighbour(
+                        side,
+                        Neighbour {
+                            frame_no: neighbour.frame_no,
+                            side: match_side.clone(),
+                            flipped: true,
+                        },
+                    );
+                    neighbour.add_neighbour(
+                        match_side,
+                        Neighbour {
+                            frame_no: self.frame_no,
+                            side: side.clone(),
+                            flipped: true,
+                        },
+                    );
                     return true;
                 }
             }
         }
-        return false
+        return false;
     }
 
     fn data_without_borders(&self) -> Vec<Vec<char>> {
-        // let tmp:Vec<Vec<char>> = Vec::new();
-        // for row in self.data[1..self.data.len()-1].iter() {
-        //     tmp.push(row[1..row.len()-1].to_vec());
-        // }
-        self.data[1..self.data.len()-1].iter().map(|row| row[1..row.len()-1].to_vec()).collect()
+        self.data[1..self.data.len() - 1]
+            .iter()
+            .map(|row| row[1..row.len() - 1].to_vec())
+            .collect()
     }
     fn add_neighbour(&mut self, side: &Side, neighbour: Neighbour) {
         self.neighbours.insert(side.clone(), neighbour);
@@ -151,7 +169,9 @@ impl Frame {
             (Side::Top, top),
             (Side::Left, left),
             (Side::Right, right),
-        ].into_iter().collect();
+        ]
+        .into_iter()
+        .collect();
         let mut new_neighbours: HashMap<Side, Neighbour> = HashMap::new();
         for (k, n) in self.neighbours.iter() {
             let new_side = match k {
@@ -180,7 +200,9 @@ impl Frame {
             (Side::Top, top),
             (Side::Left, left),
             (Side::Right, right),
-        ].into_iter().collect();
+        ]
+        .into_iter()
+        .collect();
         let mut new_neighbours: HashMap<Side, Neighbour> = HashMap::new();
         for (k, n) in self.neighbours.iter() {
             let new_side = match k {
@@ -202,17 +224,23 @@ impl Frame {
 }
 fn draw_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, Vec<Vec<char>>) {
     let mut picture_has_monster = false;
-    let mut data_with_monster :Vec<Vec<char>> = end_data.to_vec();
+    let mut data_with_monster: Vec<Vec<char>> = end_data.to_vec();
     let monster_row_len = monster[0].len();
     let mut row_id = 0;
     while row_id < end_data.len() - monster.len() {
         let mut col_id = 0;
         let mut found_monster_window = false;
-        while col_id < end_data[0].len()-monster_row_len {
+        while col_id < end_data[0].len() - monster_row_len {
             let mut found_monster = false;
-            for (monster_row, row) in monster.iter().zip(end_data[row_id..row_id+monster.len()].iter()) {
-                for (monster_ch, ch) in monster_row.iter().zip(row[col_id..col_id+monster_row_len].iter()) {
-                    if *monster_ch == '#' && *ch =='#' {
+            for (monster_row, row) in monster
+                .iter()
+                .zip(end_data[row_id..row_id + monster.len()].iter())
+            {
+                for (monster_ch, ch) in monster_row
+                    .iter()
+                    .zip(row[col_id..col_id + monster_row_len].iter())
+                {
+                    if *monster_ch == '#' && *ch == '#' {
                         found_monster = true;
                     } else if *monster_ch == '#' && *ch != '#' {
                         found_monster = false;
@@ -224,24 +252,32 @@ fn draw_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
                 }
             }
             if found_monster {
-                for (row_offset, (monster_row, row)) in monster.iter().zip(end_data[row_id..row_id+monster.len()].iter()).enumerate() {
-                    for (col_offset, (monster_ch, ch)) in monster_row.iter().zip(row[col_id..col_id+monster_row_len].iter()).enumerate() {
-                        if *monster_ch == '#' && *ch =='#' {
+                for (row_offset, (monster_row, row)) in monster
+                    .iter()
+                    .zip(end_data[row_id..row_id + monster.len()].iter())
+                    .enumerate()
+                {
+                    for (col_offset, (monster_ch, ch)) in monster_row
+                        .iter()
+                        .zip(row[col_id..col_id + monster_row_len].iter())
+                        .enumerate()
+                    {
+                        if *monster_ch == '#' && *ch == '#' {
                             data_with_monster[row_id + row_offset][col_id + col_offset] = 'O';
                         }
                     }
                 }
                 found_monster_window = true;
                 picture_has_monster = true;
-                break;
             }
-            col_id += 1;
             if found_monster_window {
-                break;
+                col_id += monster_row_len;
+            } else {
+                col_id += 1;
             }
         }
         if found_monster_window {
-            row_id += 3;
+            row_id += 1;
         } else {
             row_id += 1;
         }
@@ -280,15 +316,16 @@ fn check_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> usize 
             }
             break;
         }
+
         end_data = rotate(&end_data);
     }
     res_2
 }
+
 fn main() -> io::Result<()> {
     let files_results = vec![
         ("test.txt", 20899048083289_usize, 273),
-        ("input.txt", 20913499394191, 2269),
-
+        ("input.txt", 20913499394191, 2209),
     ];
     for (f, result_1, result_2) in files_results.iter() {
         println!("{}", f);
@@ -303,8 +340,7 @@ fn main() -> io::Result<()> {
                 let frame = Frame::new(&tmp);
                 frames.insert(frame.frame_no, RefCell::new(frame));
                 tmp.clear();
-            }
-            else {
+            } else {
                 tmp.push(line.to_vec());
             }
         }
@@ -324,7 +360,7 @@ fn main() -> io::Result<()> {
         let mut res_1 = 1;
         for frame in frames.values() {
             if frame.borrow().neighbours.len() == 2 {
-                res_1*=frame.borrow().frame_no;
+                res_1 *= frame.borrow().frame_no;
             }
         }
         assert_eq!(res_1, *result_1);
@@ -333,7 +369,9 @@ fn main() -> io::Result<()> {
         for frame in frames.values() {
             let mut frame = frame.borrow().clone();
             if frame.neighbours.len() == 2 {
-                while !frame.neighbours.contains_key(&Side::Bottom) || !frame.neighbours.contains_key(&Side::Right) {
+                while !frame.neighbours.contains_key(&Side::Bottom)
+                    || !frame.neighbours.contains_key(&Side::Right)
+                {
                     frame = frame.rotate();
                 }
                 first_corner = Some(frame.clone());
@@ -341,7 +379,6 @@ fn main() -> io::Result<()> {
         }
         let first_corner = first_corner.unwrap().clone();
 
-        println!("{:?}", first_corner);
         let directions: Vec<Side> = first_corner.neighbours.keys().cloned().collect();
         let mut queue: Vec<(Frame, usize, usize)> = vec![(first_corner, 0, 0)];
         let mut seen: HashSet<usize> = HashSet::new();
@@ -356,7 +393,7 @@ fn main() -> io::Result<()> {
             seen.insert(current.frame_no);
             // println!("Current: {:?}", current.frame_no);
             for dir in directions.iter() {
-                if !current.neighbours.contains_key(&dir){
+                if !current.neighbours.contains_key(&dir) {
                     // println!("Frame: {} doesn't have {:?}", current.frame_no, dir);
                     continue;
                 }
@@ -417,7 +454,8 @@ fn main() -> io::Result<()> {
             None => 0,
         };
 
-        let mut end_data:Vec<Vec<char>> = vec![vec!['.'; row_len * data_size]; col_len * data_size];
+        let mut end_data: Vec<Vec<char>> =
+            vec![vec!['.'; row_len * data_size]; col_len * data_size];
         for (i, row) in end_vec.iter().enumerate() {
             for (j, f) in row.iter().enumerate() {
                 match f {
@@ -427,7 +465,7 @@ fn main() -> io::Result<()> {
                                 end_data[i * data_size + ii][j * data_size + jj] = *ch;
                             }
                         }
-                    },
+                    }
                     None => (),
                 };
             }
@@ -438,6 +476,6 @@ fn main() -> io::Result<()> {
             .collect();
         let res_2 = check_monsters(&end_data, &monster);
         assert_eq!(res_2, *result_2);
-        }
+    }
     Ok(())
 }
