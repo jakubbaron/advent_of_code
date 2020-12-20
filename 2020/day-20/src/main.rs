@@ -347,14 +347,16 @@ fn main() -> io::Result<()> {
         }
         let res_1 = frames
             .values()
-            .filter(|x| x.borrow().neighbours.len() == 2)
-            .fold(1, |acc, frame| acc * frame.borrow().frame_no);
+            .map(|x| x.borrow())
+            .filter(|x| x.neighbours.len() == 2)
+            .fold(1, |acc, frame| acc * frame.frame_no);
         assert_eq!(res_1, *result_1);
 
         let mut first_corner: Option<Frame> = None;
         for frame in frames.values() {
-            let mut frame = frame.borrow().clone();
+            let frame = frame.borrow();
             if frame.neighbours.len() == 2 {
+                let mut frame = frame.clone();
                 while !frame.neighbours.contains_key(&Side::Bottom)
                     || !frame.neighbours.contains_key(&Side::Right)
                 {
@@ -370,12 +372,11 @@ fn main() -> io::Result<()> {
         let mut seen: HashSet<usize> = HashSet::new();
         let sq_size = (frames.len() as f64).sqrt() as usize;
         let mut end_vec: Vec<Vec<Option<Frame>>> = vec![vec![None; sq_size]; sq_size];
-        while queue.len() > 0 {
+        while !queue.is_empty() {
             let (current, i, j) = queue.pop().unwrap();
             if seen.contains(&current.frame_no) {
                 continue;
             }
-            end_vec[i][j] = Some(current.clone());
             seen.insert(current.frame_no);
             // println!("Current: {:?}", current.frame_no);
             for dir in directions.iter() {
@@ -387,16 +388,13 @@ fn main() -> io::Result<()> {
                 if seen.contains(&neigh_no) {
                     continue;
                 }
-                // println!("neigh_no: {:?}", neigh_no);
-                let neigh = frames.get(&neigh_no).unwrap().borrow();
-                let mut neigh = neigh.clone();
                 let my_side = current.sides.get(&dir).unwrap();
                 let other_direction = match dir {
                     Side::Right => Side::Left,
                     Side::Bottom => Side::Top,
-                    Side::Left => Side::Right,
-                    Side::Top => Side::Bottom,
+                    _ => continue,
                 };
+                let mut neigh: Frame = frames.get(&neigh_no).unwrap().borrow().clone();
                 let mut found = false;
                 for _ in 0..4 {
                     let other_side = neigh.sides.get(&other_direction).unwrap();
@@ -422,6 +420,7 @@ fn main() -> io::Result<()> {
                     queue.push((neigh, i, j + 1));
                 }
             }
+            end_vec[i][j] = Some(current);
         }
         for row in end_vec.iter() {
             for f in row.iter() {
@@ -442,13 +441,13 @@ fn main() -> io::Result<()> {
 
         let mut end_data: Vec<Vec<char>> =
             vec![vec!['.'; row_len * data_size]; col_len * data_size];
-        for (i, row) in end_vec.iter().enumerate() {
-            for (j, f) in row.iter().enumerate() {
+        for (i, row) in end_vec.into_iter().enumerate() {
+            for (j, f) in row.into_iter().enumerate() {
                 match f {
                     Some(f) => {
-                        for (ii, data_row) in f.data_without_borders().iter().enumerate() {
-                            for (jj, ch) in data_row.iter().enumerate() {
-                                end_data[i * data_size + ii][j * data_size + jj] = *ch;
+                        for (ii, data_row) in f.data_without_borders().into_iter().enumerate() {
+                            for (jj, ch) in data_row.into_iter().enumerate() {
+                                end_data[i * data_size + ii][j * data_size + jj] = ch;
                             }
                         }
                     }
