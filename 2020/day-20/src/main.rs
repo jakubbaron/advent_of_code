@@ -57,18 +57,18 @@ fn flip(data: &Vec<Vec<char>>) -> Vec<Vec<char>> {
 }
 
 fn get_sides(data: &Vec<Vec<char>>) -> HashMap<Side, Vec<char>> {
-   let bottom = get_bottom(&data);
-   let top = get_top(&data);
-   let left = get_left(&data);
-   let right = get_right(&data);
-   vec![
-       (Side::Bottom, bottom),
-       (Side::Top, top),
-       (Side::Left, left),
-       (Side::Right, right),
-   ]
-   .into_iter()
-   .collect()
+    let bottom = get_bottom(&data);
+    let top = get_top(&data);
+    let left = get_left(&data);
+    let right = get_right(&data);
+    vec![
+        (Side::Bottom, bottom),
+        (Side::Top, top),
+        (Side::Left, left),
+        (Side::Right, right),
+    ]
+    .into_iter()
+    .collect()
 }
 
 impl Frame {
