@@ -219,9 +219,8 @@ fn find_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
     let mut row_id = 0;
     while row_id < end_data.len() - monster.len() {
         let mut col_id = 0;
-        let mut found_monster_window = false;
         while col_id < end_data[0].len() - monster_row_len {
-            let mut found_monster = false;
+            let mut found_monster = true;
             for (monster_row, row) in monster
                 .iter()
                 .zip(end_data[row_id..row_id + monster.len()].iter())
@@ -230,9 +229,7 @@ fn find_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
                     .iter()
                     .zip(row[col_id..col_id + monster_row_len].iter())
                 {
-                    if *monster_ch == '#' && *ch == '#' {
-                        found_monster = true;
-                    } else if *monster_ch == '#' && *ch != '#' {
+                    if *monster_ch == '#' && *ch != '#' {
                         found_monster = false;
                         break;
                     }
@@ -257,20 +254,13 @@ fn find_monsters(end_data: &Vec<Vec<char>>, monster: &Vec<Vec<char>>) -> (bool, 
                         }
                     }
                 }
-                found_monster_window = true;
-                picture_has_monster = true;
-            }
-            if found_monster_window {
                 col_id += monster_row_len;
+                picture_has_monster = true;
             } else {
                 col_id += 1;
             }
         }
-        if found_monster_window {
-            row_id += 1;
-        } else {
-            row_id += 1;
-        }
+        row_id += 1;
     }
     (picture_has_monster, data_with_monster)
 }
