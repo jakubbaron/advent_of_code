@@ -22,33 +22,32 @@ fn main() -> io::Result<()> {
         let mut allergens: HashMap<String, HashSet<String>> =
             HashMap::with_capacity(file_content.len());
         let mut all_sets: Vec<HashSet<String>> = Vec::new();
-        let mut all_elvish: HashSet<String> = HashSet::new();
         for line in file_content.into_iter() {
-            let splitted = re.captures(&line).unwrap();
-            let elvish = splitted.get(1).map_or("", |m| m.as_str()).to_string();
-            let english = splitted.get(2).map_or("", |m| m.as_str()).to_string();
+            let caps = re.captures(&line).unwrap();
+            let elvish = caps.get(1).map_or("", |m| m.as_str()).to_string();
+            let english = caps.get(2).map_or("", |m| m.as_str()).to_string();
             let english = english.replace(",", "");
 
             let elvish: HashSet<String> = elvish.split(" ").map(|m| m.to_string()).collect();
             let english: HashSet<String> = english.split(" ").map(|m| m.to_string()).collect();
-            for eng_word in english.iter() {
+            for eng_word in english.into_iter() {
                 allergens
-                    .entry(eng_word.to_string())
+                    .entry(eng_word)
+                    .and_modify(|ent| ent.retain(|x| elvish.contains(x)))
                     .or_insert(elvish.clone());
-                let entry = allergens.get(eng_word).unwrap();
-                let inter: HashSet<String> = entry.intersection(&elvish).cloned().collect();
-                allergens.insert(eng_word.to_string(), inter);
             }
-            all_elvish.extend(elvish.clone());
-            all_sets.push(elvish.clone());
+            all_sets.push(elvish);
         }
         for (k, v) in allergens.iter() {
             println!("{} {:?}", k, v);
         }
+        let mut all_elvish: HashSet<String> = all_sets
+            .iter()
+            .flat_map(|x| x.clone().into_iter())
+            .collect();
         for val in allergens.values() {
             all_elvish = all_elvish.difference(&val).cloned().collect();
         }
-        // println!("{:?} -> {}", all_elvish, all_elvish.len());
         let mut res_1 = 0;
         for set in all_sets.iter() {
             let inter: HashSet<_> = set.intersection(&all_elvish).collect();
