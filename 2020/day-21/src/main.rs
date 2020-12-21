@@ -48,13 +48,12 @@ fn main() -> io::Result<()> {
         for val in allergens.values() {
             all_elvish = all_elvish.difference(&val).cloned().collect();
         }
-        let mut res_1 = 0;
-        for set in all_sets.iter() {
-            let inter: HashSet<_> = set.intersection(&all_elvish).collect();
-            res_1 += inter.len();
-        }
 
+        let res_1 = all_sets
+            .into_iter()
+            .fold(0, |acc, set| acc + set.intersection(&all_elvish).count());
         assert_eq!(res_1, result_1);
+
         let mut words: Vec<(String, HashSet<String>)> = allergens.clone().into_iter().collect();
         for i in 0..words.len() {
             words.sort_by_key(|(_k, val)| val.len());
@@ -65,7 +64,8 @@ fn main() -> io::Result<()> {
             }
         }
         assert!(words.iter().all(|(_, v)| v.len() == 1));
-        words.sort_by_key(|k| k.0.to_string());
+
+        words.sort_by_key(|(k, _)| k.to_string());
         let final_list: Vec<String> = words
             .into_iter()
             .map(|(_, val)| val.into_iter().next().unwrap())
