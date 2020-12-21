@@ -1,5 +1,5 @@
 use day_20::{
-    check_monsters, create_picture, frames_to_picture, match_neighbours, print_picture, Frame,
+    check_monsters, create_picture, frames_to_picture, match_neighbours, print_picture, Frame, get_all_sides
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -27,25 +27,38 @@ fn main() -> io::Result<()> {
                 tmp.push(line.to_vec());
             }
         }
-        match_neighbours(&frames);
+        let mut all_sides: Vec<Vec<char>> = Vec::new(); 
+        for frame in frames.values() {
+            all_sides.extend(get_all_sides(&frame.borrow()));
+        }
+        let mut side_map: HashMap<String, usize> = HashMap::new();
+        for side in all_sides.iter() {
+            let s:String = side.into_iter().collect();
+            side_map.entry(s).and_modify(|x| *x+=1).or_insert(1);
+        }
+        for (k,v) in side_map.iter() {
+            println!("{:?}: {}", k, v);
+            assert!(*v == 1 || *v == 2);
+        }
+        // match_neighbours(&frames);
 
-        let res_1 = frames
-            .values()
-            .map(|x| x.borrow())
-            .filter(|x| x.get_neighbours_len() == 2)
-            .fold(1, |acc, frame| acc * frame.frame_no);
-        assert_eq!(res_1, *result_1);
+        // let res_1 = frames
+        //     .values()
+        //     .map(|x| x.borrow())
+        //     .filter(|x| x.get_neighbours_len() == 2)
+        //     .fold(1, |acc, frame| acc * frame.frame_no);
+        // assert_eq!(res_1, *result_1);
 
-        let end_vec = create_picture(&frames);
-        print_picture(&end_vec);
+        // let end_vec = create_picture(&frames);
+        // print_picture(&end_vec);
 
-        let end_data = frames_to_picture(end_vec);
-        let monster: Vec<Vec<char>> = std::fs::read_to_string("monster.txt")?
-            .lines()
-            .map(|x| x.chars().collect())
-            .collect();
-        let res_2 = check_monsters(&end_data, &monster);
-        assert_eq!(res_2, *result_2);
+        // let end_data = frames_to_picture(end_vec);
+        // let monster: Vec<Vec<char>> = std::fs::read_to_string("monster.txt")?
+        //     .lines()
+        //     .map(|x| x.chars().collect())
+        //     .collect();
+        // let res_2 = check_monsters(&end_data, &monster);
+        // assert_eq!(res_2, *result_2);
     }
     Ok(())
 }

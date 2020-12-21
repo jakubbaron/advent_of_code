@@ -64,6 +64,15 @@ fn flip(data: &Vec<Vec<char>>) -> Vec<Vec<char>> {
     new_data
 }
 
+pub fn get_all_sides(frame: &Frame) -> Vec<Vec<char>> {
+    let mut tmp: Vec<Vec<char>> = Vec::new();
+    for side in frame.sides.values() {
+        tmp.push(side.to_vec());
+        tmp.push(side.to_vec().into_iter().rev().collect());
+    }
+    tmp
+}
+
 fn get_sides(data: &Vec<Vec<char>>) -> HashMap<Side, Vec<char>> {
     let bottom = get_bottom(&data);
     let top = get_top(&data);
