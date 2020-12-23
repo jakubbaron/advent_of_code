@@ -1,9 +1,9 @@
-use std::collections::VecDeque;
+use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::io::{self};
-use std::collections::hash_map::DefaultHasher;
+use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
+use std::io::{self};
 
 #[derive(Hash, PartialEq, Eq, Clone, Debug)]
 struct Player {
@@ -46,7 +46,10 @@ struct Game {
 
 impl Game {
     fn new(player_1: &Player, player_2: &Player) -> Game {
-        Game {player_1: player_1.clone(), player_2: player_2.clone()}
+        Game {
+            player_1: player_1.clone(),
+            player_2: player_2.clone(),
+        }
     }
 
     fn play(&mut self) {
@@ -85,7 +88,7 @@ struct Game2 {
     game_id: usize,
 }
 
-static mut GAME_ID:usize = 1_usize;
+static mut GAME_ID: usize = 1_usize;
 
 impl Game2 {
     fn new(player_1: &Player, player_2: &Player) -> Game2 {
@@ -95,7 +98,12 @@ impl Game2 {
             game_id = GAME_ID.clone();
             GAME_ID += 1;
         }
-        Game2{player_1: player_1.clone(), player_2: player_2.clone(), previous_cards:HashMap::new(), game_id}
+        Game2 {
+            player_1: player_1.clone(),
+            player_2: player_2.clone(),
+            previous_cards: HashMap::new(),
+            game_id,
+        }
     }
 
     fn _same_decks(&mut self, p: PlayerEnum) -> bool {
@@ -168,10 +176,10 @@ impl Game2 {
                 match new_game.play() {
                     PlayerEnum::Player1 => {
                         self.player_1.push_cards(card_1, card_2);
-                    },
+                    }
                     PlayerEnum::Player2 => {
                         self.player_2.push_cards(card_2, card_1);
-                    },
+                    }
                 }
             } else {
                 if card_1 > card_2 {
@@ -209,7 +217,7 @@ fn main() -> io::Result<()> {
                 .collect(),
         );
 
-        let mut game = Game::new(&player_1,&player_2);
+        let mut game = Game::new(&player_1, &player_2);
         game.play();
         let score = game.get_score().unwrap();
 
