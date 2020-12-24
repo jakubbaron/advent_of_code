@@ -1,3 +1,7 @@
+use std::cell::{RefCell, RefMut};
+use std::collections::HashMap;
+use std::rc::Rc;
+
 fn print_game(game: &Vec<i32>, curr_id: usize) {
     print!("cups: ");
     for (idd, item) in game.iter().enumerate() {
@@ -78,23 +82,93 @@ fn get_result_2(game: &Vec<i32>, game_len: usize) -> usize {
     game[wrap_id(pos+1)] as usize * game[wrap_id(pos+1)] as usize
 }
 
+type Link<T> = Option<Rc<RefCell<Node<T>>>>;
+
+#[derive(Debug)]
+struct Node<T> {
+    elem: T,
+    next: Link<T>,
+}
+
+
 fn main() {
     let files_results = vec![
         // ("389125467", "67384529", 149245887792_usize),
-        ("315679824", "72496583", 1_usize)
+        // ("315679824", "72496583", 1_usize)
+        ("321979824", "72496583", 1_usize)
     ];
     for (input, result_1, result_2) in files_results.into_iter() {
         let game: Vec<i32> = input
             .chars()
             .map(|c| c.to_string().parse::<i32>().unwrap())
             .collect();
-        let game = play_game(game.to_vec(), 100, true, "Test".to_string());
-        assert_eq!(get_result_1(&game, game.len()), result_1);
-        let mut game_2: Vec<i32> = (1..=1_000_000).collect();
-        for (i,number) in game.iter().enumerate() {
-            game_2[i] = *number;
+        let (first, elements) = game.split_first().unwrap();
+        let mut node = Rc::new(RefCell::new(Node{elem: *first, next: None}));
+        let mut head = Rc::clone(&node);
+        let max_cup = *game.iter().max().unwrap();
+
+        for elem in elements.into_iter() {
+            let mut second_node = Rc::new(RefCell::new(Node{elem: *elem, next:None}));
+            node.borrow_mut().next = Some(second_node);
+            let abc = Rc::clone(&node.borrow().next.as_ref().unwrap());
+            node = abc;
         }
-        let game_2 = play_game(game_2, 10_000_000, false, "input".to_string());
-        assert_eq!(get_result_2(&game_2, game_2.len()), result_2);
+        node.borrow_mut().next = Some(Rc::clone(&head));
+
+        let game_len = game.len();
+        for i in 0..game.len() {
+            println!("{}", head.borrow().elem);
+            let abc = Rc::clone(&head.borrow().next.as_ref().unwrap());
+            head = abc;
+        }
+
+        for id in 0..1 {
+            let mut third_in_front = Rc::clone(&head);
+            for i in 0..4 {
+                let abc = Rc::clone(&third_in_front.borrow().next.as_ref().unwrap());
+                third_in_front = abc;
+            }
+            println!("third {}", third_in_front.borrow().elem);
+            let current_value = head.borrow().elem;
+            let mut sought_value = current_value - 1;
+            if sought_value == 0 {
+                sought_value = max_cup;
+            }
+            let mut all_good = false;
+            while !all_good {
+                let mut tmp = Rc::clone(&head.borrow().next.as_ref().unwrap());
+                all_good = true;
+                for i in 0..3 {
+                    // println!("elem {} sought {}", tmp.borrow().elem, sought_value);
+                    if tmp.borrow().elem == sought_value {
+                        sought_value -= 1;
+                        if sought_value == 0 {
+                            sought_value = max_cup;
+                        }
+                        all_good = false;
+                        // println!("breaking");
+                        break;
+                    }
+                    let abc = Rc::clone(&tmp.borrow().next.as_ref().unwrap());
+                    tmp = abc;
+                }
+            }
+            println!("Sought value: {}", sought_value);
+            head.borrow_mut().next = Some(Rc::clone(&third_in_front));
+        }
+
+
+        // println!("{:?}", head);
+        // println!("{:?}", node);
+
+
+        // let game = play_game(game.to_vec(), 100, true, "Test".to_string());
+        // assert_eq!(get_result_1(&game, game.len()), result_1);
+        // let mut game_2: Vec<i32> = (1..=1_000_000).collect();
+        // for (i,number) in game.iter().enumerate() {
+        //     game_2[i] = *number;
+        // }
+        // let game_2 = play_game(game_2, 10_000_000, false, "input".to_string());
+        // assert_eq!(get_result_2(&game_2, game_2.len()), result_2);
     }
 }
