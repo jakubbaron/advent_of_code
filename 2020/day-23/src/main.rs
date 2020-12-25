@@ -2,36 +2,30 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-fn get_result_1(head: Rc<RefCell<Node<i32>>>, game_len: usize) -> String {
-    let mut temp_head = Rc::clone(&head);
-    let mut val = temp_head.borrow().elem;
+fn get_result_1(mut head: Rc<RefCell<Node<i32>>>, game_len: usize) -> String {
+    let mut val = head.borrow().elem;
     while val != 1 {
-        let abc = Rc::clone(&temp_head.borrow().next.as_ref().unwrap());
-        temp_head = abc;
-        val = temp_head.borrow().elem;
+        head = get_next_rc(&head);
+        val = head.borrow().elem;
     }
-    let abc = Rc::clone(&temp_head.borrow().next.as_ref().unwrap());
-    temp_head = abc;
+    head = get_next_rc(&head);
     let mut end_str = "".to_owned();
     for _ in 0..game_len - 1 {
-        end_str.push_str(&temp_head.borrow().elem.to_string());
-        let abc = Rc::clone(&temp_head.borrow().next.as_ref().unwrap());
-        temp_head = abc;
+        end_str.push_str(&head.borrow().elem.to_string());
+        head = get_next_rc(&head);
     }
     end_str
 }
 
-fn get_result_2(head: Rc<RefCell<Node<i32>>>) -> usize {
-    let mut temp_head = Rc::clone(&head);
-    let mut val = temp_head.borrow().elem;
+fn get_result_2(mut head: Rc<RefCell<Node<i32>>>) -> usize {
+    let mut val = head.borrow().elem;
     while val != 1 {
-        let abc = Rc::clone(&temp_head.borrow().next.as_ref().unwrap());
-        temp_head = abc;
-        val = temp_head.borrow().elem;
+        head = get_next_rc(&head);
+        val = head.borrow().elem;
     }
-    let next_elem = Rc::clone(&temp_head.borrow().next.as_ref().unwrap());
+    let next_elem = get_next_rc(&head);
     let val_2 = next_elem.borrow().elem;
-    let next_elem_2 = Rc::clone(&next_elem.borrow().next.as_ref().unwrap());
+    let next_elem_2 = get_next_rc(&next_elem);
     val = next_elem_2.borrow().elem;
     (val as usize) * (val_2 as usize)
 }
@@ -126,10 +120,9 @@ fn print_nodes<T: std::fmt::Display> (mut node: Rc<RefCell<Node<T>>>, len: usize
 }
 
 fn create_map<T: Eq + std::hash::Hash + Copy> (mut node: Rc<RefCell<Node<T>>>, len: usize) -> HashMap<T, Rc<RefCell<Node<T>>>> {
-    let mut game_map = HashMap::new();
+    let mut game_map = HashMap::with_capacity(len);
     for _ in 0..len {
-        let val = node.borrow().elem;
-        game_map.insert(val, Rc::clone(&node));
+        game_map.insert(node.borrow().elem, Rc::clone(&node));
         node = get_next_rc(&node);
     }
     game_map
