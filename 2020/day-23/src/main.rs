@@ -44,6 +44,7 @@ struct Node<T> {
     next: Link<T>,
 }
 
+
 fn play_game_2(
     mut head: Rc<RefCell<Node<i32>>>,
     game_map: &HashMap<i32, Rc<RefCell<Node<i32>>>>,
@@ -90,6 +91,57 @@ fn play_game_2(
     head
 }
 
+impl<T> Node<T> {
+    fn new(elem: T) -> Node<T> {
+        Node{elem, next:None}
+    }
+
+    fn set_next(&mut self, node: Node<T>) {
+        self.next = Some(Rc::new(RefCell::new(node)));
+    }
+
+    fn get_next(&self) -> Rc<RefCell<Node<T>>> {
+        Rc::clone(&self.next.as_ref().unwrap())
+    }
+    fn get_next_rc(node: &Rc<RefCell<Node<T>>>) -> Rc<RefCell<Node<T>>> {
+        let tmp = node.borrow().get_next();
+        tmp
+    }
+}
+
+fn print_nodes<T: std::fmt::Display> (mut node: Rc<RefCell<Node<T>>>, len: usize, curr_id: usize) {
+    for i in 0..len {
+        if i != curr_id {
+            print!("{} ", node.borrow().elem);
+        } else {
+            print!("({}) ", node.borrow().elem);
+        }
+        node = Node::get_next_rc(&node);
+    }
+    println!("");
+}
+
+fn create_map<T: Eq + std::hash::Hash + Copy> (mut node: Rc<RefCell<Node<T>>>, len: usize) -> HashMap<T, Rc<RefCell<Node<T>>>> {
+    let mut game_map = HashMap::new();
+    for _ in 0..len {
+        let val = node.borrow().elem;
+        game_map.insert(val, Rc::clone(&node));
+        node = Node::get_next_rc(&node);
+    }
+    game_map
+}
+
+fn from_vec<T: Copy>(v: &[T]) -> (Rc<RefCell<Node<T>>>, Rc<RefCell<Node<T>>>) {
+    let mut node = Rc::new(RefCell::new(Node::new(v[0])));
+    let head = Rc::clone(&node);
+    let elements = &v[1..v.len()];
+    for elem in elements.iter() {
+        node.borrow_mut().set_next(Node::new(*elem));
+        node = Node::get_next_rc(&node);
+    }
+    (node, head)
+}
+
 fn main() {
     let files_results = vec![
         ("389125467", "67384529", 149245887792_usize),
@@ -100,87 +152,29 @@ fn main() {
             .chars()
             .map(|c| c.to_string().parse::<i32>().unwrap())
             .collect();
-        let (first, elements) = game.split_first().unwrap();
-        let mut node = Rc::new(RefCell::new(Node {
-            elem: *first,
-            next: None,
-        }));
-        let mut head = Rc::clone(&node);
         let max_cup = *game.iter().max().unwrap();
 
-        for elem in elements.iter() {
-            let second_node = Rc::new(RefCell::new(Node {
-                elem: *elem,
-                next: None,
-            }));
-            node.borrow_mut().next = Some(second_node);
-            let abc = Rc::clone(&node.borrow().next.as_ref().unwrap());
-            node = abc;
-        }
+        let (node, mut head) = from_vec(&game);
         node.borrow_mut().next = Some(Rc::clone(&head));
 
         let game_len = game.len();
-        for _ in 0..game.len() {
-            print!("{}", head.borrow().elem);
-            let abc = Rc::clone(&head.borrow().next.as_ref().unwrap());
-            head = abc;
-        }
-        let mut game_map: HashMap<i32, Rc<RefCell<Node<i32>>>> = HashMap::new();
-        let mut tmp = Rc::clone(&head);
-        for _ in 0..game.len() {
-            let val = tmp.borrow().elem;
-            let to_insert = Rc::clone(&tmp);
-            game_map.insert(val, to_insert);
-            let abc = Rc::clone(&tmp.borrow().next.as_ref().unwrap());
-            tmp = abc;
-        }
-        println!("");
+        print_nodes(Rc::clone(&head), game_len, 0);
+
+        let game_map = create_map::<i32>(Rc::clone(&head), game_len);
         head = play_game_2(head, &game_map, max_cup, 100);
-
-        println!("PRINT GAME");
-        for _ in 0..game.len() {
-            print!("{}", head.borrow().elem);
-            let abc = Rc::clone(&head.borrow().next.as_ref().unwrap());
-            head = abc;
-        }
-        println!("");
-
         assert_eq!(get_result_1(Rc::clone(&head), game_len), result_1);
 
         let mut game_2: Vec<i32> = (1..=1_000_000).collect();
+        let max_cup = 1_000_000;
         for (i, el) in game.iter().enumerate() {
             game_2[i] = *el;
         }
 
-        let (first, elements) = game_2.split_first().unwrap();
-        let mut node = Rc::new(RefCell::new(Node {
-            elem: *first,
-            next: None,
-        }));
-        let mut head = Rc::clone(&node);
-        let max_cup = 1_000_000;
-
-        for elem in elements.iter() {
-            let second_node = Rc::new(RefCell::new(Node {
-                elem: *elem,
-                next: None,
-            }));
-            node.borrow_mut().next = Some(second_node);
-            let abc = Rc::clone(&node.borrow().next.as_ref().unwrap());
-            node = abc;
-        }
+        let (node, mut head) = from_vec(&game_2);
         node.borrow_mut().next = Some(Rc::clone(&head));
 
-        let mut game_map: HashMap<i32, Rc<RefCell<Node<i32>>>> = HashMap::new();
-        let mut tmp = Rc::clone(&head);
-        for _ in 0..game_2.len() {
-            let val = tmp.borrow().elem;
-            let to_insert = Rc::clone(&tmp);
-            game_map.insert(val, to_insert);
-            let abc = Rc::clone(&tmp.borrow().next.as_ref().unwrap());
-            tmp = abc;
-        }
-
+        let game_len = game_2.len();
+        let game_map = create_map::<i32>(Rc::clone(&head), game_len);
         head = play_game_2(head, &game_map, max_cup, 10_000_000);
         assert_eq!(get_result_2(Rc::clone(&head)), result_2);
     }
