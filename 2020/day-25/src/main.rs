@@ -4,7 +4,7 @@ fn find_loop_size(key: usize, subject:usize) -> usize {
     let mut value = 1;
     let mut loop_size = 0;
     while value != key {
-        if loop_size % 1_000_000 == 0 {
+        if loop_size != 0 && loop_size % 100_000 == 0 {
             println!("Loop size: {}, subject {}", loop_size, subject);
         }
         loop_size += 1;
