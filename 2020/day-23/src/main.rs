@@ -44,7 +44,30 @@ struct Node<T> {
     next: Link<T>,
 }
 
-
+fn get_sought_value(node: Rc<RefCell<Node<i32>>>, reset_cup: i32, max_cup: i32) -> i32 {
+    let current_value = node.borrow().elem;
+    let mut sought_value = current_value - 1;
+    if sought_value == reset_cup {
+        sought_value = max_cup;
+    }
+    let mut all_good = false;
+    while !all_good {
+        let mut tmp = node.borrow().get_next();
+        all_good = true;
+        for _ in 0..3 {
+            if tmp.borrow().elem == sought_value {
+                sought_value = sought_value - 1;
+                if sought_value == reset_cup {
+                    sought_value = max_cup;
+                }
+                all_good = false;
+                break;
+            }
+            tmp = Node::get_next_rc(&tmp);
+        }
+    }
+    sought_value
+}
 fn play_game_2(
     mut head: Rc<RefCell<Node<i32>>>,
     game_map: &HashMap<i32, Rc<RefCell<Node<i32>>>>,
@@ -52,41 +75,18 @@ fn play_game_2(
     iterations: usize,
 ) -> Rc<RefCell<Node<i32>>> {
     for _ in 1..iterations + 1 {
-        let mut third_in_front = Rc::clone(&head);
         let first_of_three = Rc::clone(&head.borrow().next.as_ref().unwrap());
+        let mut third_in_front = Rc::clone(&head);
         for _ in 0..3 {
-            let abc = Rc::clone(&third_in_front.borrow().next.as_ref().unwrap());
-            third_in_front = abc;
+            third_in_front = Node::get_next_rc(&third_in_front);
         }
-        let current_value = head.borrow().elem;
-        let mut sought_value = current_value - 1;
-        if sought_value == 0 {
-            sought_value = max_cup;
-        }
-        let mut all_good = false;
-        while !all_good {
-            let mut tmp = Rc::clone(&head.borrow().next.as_ref().unwrap());
-            all_good = true;
-            for _ in 0..3 {
-                if tmp.borrow().elem == sought_value {
-                    sought_value -= 1;
-                    if sought_value == 0 {
-                        sought_value = max_cup;
-                    }
-                    all_good = false;
-                    break;
-                }
-                let abc = Rc::clone(&tmp.borrow().next.as_ref().unwrap());
-                tmp = abc;
-            }
-        }
+        let sought_value = get_sought_value(Rc::clone(&head), 0, max_cup);
         let new_tail = Rc::clone(game_map.get(&sought_value).unwrap());
-        let temp_old_tail = Rc::clone(&new_tail.borrow().next.as_ref().unwrap());
-        head.borrow_mut().next = Some(Rc::clone(&third_in_front.borrow().next.as_ref().unwrap()));
-        new_tail.borrow_mut().next = Some(Rc::clone(&first_of_three));
+        let temp_old_tail = Node::get_next_rc(&new_tail);
+        head.borrow_mut().set_next_rc(Node::get_next_rc(&third_in_front));
+        new_tail.borrow_mut().set_next_rc(first_of_three);
         third_in_front.borrow_mut().next = Some(temp_old_tail);
-        let abc = Rc::clone(&head.borrow().next.as_ref().unwrap());
-        head = abc;
+        head = Node::get_next_rc(&head);
     }
     head
 }
@@ -98,6 +98,9 @@ impl<T> Node<T> {
 
     fn set_next(&mut self, node: Node<T>) {
         self.next = Some(Rc::new(RefCell::new(node)));
+    }
+    fn set_next_rc(&mut self, node_rc: Rc<RefCell<Node<T>>>) {
+        self.next = Some(node_rc);
     }
 
     fn get_next(&self) -> Rc<RefCell<Node<T>>> {
