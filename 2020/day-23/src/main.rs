@@ -1,7 +1,6 @@
-use std::cell::{RefCell};
-use std::rc::Rc;
+use std::cell::RefCell;
 use std::collections::HashMap;
-
+use std::rc::Rc;
 
 fn get_result_1(head: Rc<RefCell<Node<i32>>>, game_len: usize) -> String {
     let mut temp_head = Rc::clone(&head);
@@ -21,7 +20,6 @@ fn get_result_1(head: Rc<RefCell<Node<i32>>>, game_len: usize) -> String {
     }
     end_str
 }
-
 
 fn get_result_2(head: Rc<RefCell<Node<i32>>>) -> usize {
     let mut temp_head = Rc::clone(&head);
@@ -46,8 +44,13 @@ struct Node<T> {
     next: Link<T>,
 }
 
-fn play_game_2(mut head: Rc<RefCell<Node<i32>>>, game_map: &HashMap<i32, Rc<RefCell<Node<i32>>>>, max_cup: i32, iterations: usize) -> Rc<RefCell<Node<i32>>> {
-    for _ in 1..iterations+1 {
+fn play_game_2(
+    mut head: Rc<RefCell<Node<i32>>>,
+    game_map: &HashMap<i32, Rc<RefCell<Node<i32>>>>,
+    max_cup: i32,
+    iterations: usize,
+) -> Rc<RefCell<Node<i32>>> {
+    for _ in 1..iterations + 1 {
         let mut third_in_front = Rc::clone(&head);
         let first_of_three = Rc::clone(&head.borrow().next.as_ref().unwrap());
         for _ in 0..3 {
@@ -90,7 +93,7 @@ fn play_game_2(mut head: Rc<RefCell<Node<i32>>>, game_map: &HashMap<i32, Rc<RefC
 fn main() {
     let files_results = vec![
         ("389125467", "67384529", 149245887792_usize),
-        ("315679824", "72496583", 41785843847_usize)
+        ("315679824", "72496583", 41785843847_usize),
     ];
     for (input, result_1, result_2) in files_results.into_iter() {
         let game: Vec<i32> = input
@@ -98,12 +101,18 @@ fn main() {
             .map(|c| c.to_string().parse::<i32>().unwrap())
             .collect();
         let (first, elements) = game.split_first().unwrap();
-        let mut node = Rc::new(RefCell::new(Node{elem: *first, next: None}));
+        let mut node = Rc::new(RefCell::new(Node {
+            elem: *first,
+            next: None,
+        }));
         let mut head = Rc::clone(&node);
         let max_cup = *game.iter().max().unwrap();
 
         for elem in elements.iter() {
-            let second_node = Rc::new(RefCell::new(Node{elem: *elem, next:None}));
+            let second_node = Rc::new(RefCell::new(Node {
+                elem: *elem,
+                next: None,
+            }));
             node.borrow_mut().next = Some(second_node);
             let abc = Rc::clone(&node.borrow().next.as_ref().unwrap());
             node = abc;
@@ -144,12 +153,18 @@ fn main() {
         }
 
         let (first, elements) = game_2.split_first().unwrap();
-        let mut node = Rc::new(RefCell::new(Node{elem: *first, next: None}));
+        let mut node = Rc::new(RefCell::new(Node {
+            elem: *first,
+            next: None,
+        }));
         let mut head = Rc::clone(&node);
         let max_cup = 1_000_000;
 
         for elem in elements.iter() {
-            let second_node = Rc::new(RefCell::new(Node{elem: *elem, next:None}));
+            let second_node = Rc::new(RefCell::new(Node {
+                elem: *elem,
+                next: None,
+            }));
             node.borrow_mut().next = Some(second_node);
             let abc = Rc::clone(&node.borrow().next.as_ref().unwrap());
             node = abc;
@@ -168,6 +183,5 @@ fn main() {
 
         head = play_game_2(head, &game_map, max_cup, 10_000_000);
         assert_eq!(get_result_2(Rc::clone(&head)), result_2);
-
     }
 }

@@ -26,7 +26,11 @@ impl Point {
     }
 }
 
-fn get_neighbouring_black_tiles(point: &Point, previous_tiles: &HashMap<Point, Color>, neighbours: &Vec<Point>) -> usize {
+fn get_neighbouring_black_tiles(
+    point: &Point,
+    previous_tiles: &HashMap<Point, Color>,
+    neighbours: &Vec<Point>,
+) -> usize {
     let mut black_count = 0;
     for n in neighbours.iter() {
         match previous_tiles.get(&point.add(n)) {
@@ -115,7 +119,8 @@ fn main() -> io::Result<()> {
         let neighbours: Vec<Point> = direction_map.values().cloned().collect();
         for _ in 0..100 {
             for (point, color) in previous_tiles.iter() {
-                let black_count = get_neighbouring_black_tiles(&point, &previous_tiles, &neighbours);
+                let black_count =
+                    get_neighbouring_black_tiles(&point, &previous_tiles, &neighbours);
                 let new_color = get_new_color(black_count, *color);
                 tiles.insert(point.clone(), new_color);
                 if *color == Color::Black {
@@ -124,7 +129,8 @@ fn main() -> io::Result<()> {
                         if previous_tiles.contains_key(&tmp_point) {
                             continue;
                         }
-                        let black_count = get_neighbouring_black_tiles(&tmp_point, &previous_tiles, &neighbours);
+                        let black_count =
+                            get_neighbouring_black_tiles(&tmp_point, &previous_tiles, &neighbours);
                         let new_color = get_new_color(black_count, Color::White);
                         if new_color == Color::Black {
                             tiles.insert(tmp_point, new_color);

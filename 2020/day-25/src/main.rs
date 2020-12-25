@@ -1,6 +1,6 @@
 use std::io::{self};
 
-fn find_loop_size(key: usize, subject:usize) -> usize {
+fn find_loop_size(key: usize, subject: usize) -> usize {
     let mut value = 1;
     let mut loop_size = 0;
     while value != key {
@@ -14,10 +14,7 @@ fn find_loop_size(key: usize, subject:usize) -> usize {
 }
 
 fn main() -> io::Result<()> {
-    let files_results = vec![
-        ("test.txt", 14897079, 1),
-        ("input.txt", 290487, 1)
-    ];
+    let files_results = vec![("test.txt", 14897079, 1), ("input.txt", 290487, 1)];
     for (f, result_1, _result_2) in files_results.into_iter() {
         println!("{}", f);
         let file_content: Vec<String> = std::fs::read_to_string(f)?
