@@ -66,7 +66,7 @@ fn main() -> io::Result<()> {
     let files_results = vec![
         ("test.txt", 2, 0),
         ("test2.txt", 0, 2),
-        ("input.txt", 255, 1),
+        ("input.txt", 255, 55),
     ];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
