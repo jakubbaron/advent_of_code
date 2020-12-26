@@ -2,7 +2,7 @@ use std::io::{self};
 
 fn get_result_1(file_content: &Vec<String>) -> usize {
     let line = &file_content[0];
-    line.chars().filter(|&x| x=='(').count() - line.chars().filter(|&x| x==')').count()
+    line.chars().filter(|&x| x == '(').count() - line.chars().filter(|&x| x == ')').count()
 }
 fn get_result_2(file_content: &Vec<String>) -> Option<usize> {
     let mut floor = 0;
