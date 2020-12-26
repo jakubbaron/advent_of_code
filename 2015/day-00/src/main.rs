@@ -5,9 +5,9 @@ fn main() -> io::Result<()> {
         ("test.txt", 1, 1),
         ("input.txt", 1, 1)
     ];
-    for (f, result_1, _result_2) in files_results.into_iter() {
+    for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
-        let file_content: Vec<&str> = std::fs::read_to_string(f)?
+        let file_content: Vec<String> = std::fs::read_to_string(f)?
             .lines()
             .map(|x| x.to_string())
             .collect();
