@@ -1,5 +1,5 @@
-use std::io::{self};
 use std::collections::HashSet;
+use std::io::{self};
 
 #[derive(Debug, Clone, Copy)]
 struct CityId(usize);
@@ -7,7 +7,10 @@ struct CityId(usize);
 #[derive(Debug, Clone, Copy)]
 struct Distance(f64);
 
-fn get_vertex_with_min_distance(min_distances: &Vec<f64>, visited: &HashSet<usize>) -> (usize, f64) {
+fn get_vertex_with_min_distance(
+    min_distances: &Vec<f64>,
+    visited: &HashSet<usize>,
+) -> (usize, f64) {
     let mut current_min_distance = f64::MAX;
     let mut vertex = usize::MAX;
 
@@ -27,7 +30,7 @@ fn dijkstra_algorithm(start: usize, edges: &Vec<Vec<(CityId, Distance)>>) -> Vec
     let number_of_vertices = edges.len();
     let mut min_distances = vec![f64::MAX; number_of_vertices];
     min_distances[start] = 0.0;
-    let mut visited:HashSet<usize> = HashSet::new();
+    let mut visited: HashSet<usize> = HashSet::new();
     while visited.len() != number_of_vertices {
         let (vertex, current_min_distance) = get_vertex_with_min_distance(&min_distances, &visited);
         if current_min_distance == f64::MAX {
@@ -52,7 +55,7 @@ fn dijkstra_algorithm(start: usize, edges: &Vec<Vec<(CityId, Distance)>>) -> Vec
 fn main() -> io::Result<()> {
     let files_results = vec![
         ("test.txt", 605_f64, 982_f64),
-        ("input.txt", 117_f64, 909_f64)
+        ("input.txt", 117_f64, 909_f64),
     ];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
@@ -64,7 +67,7 @@ fn main() -> io::Result<()> {
         let mut distances: Vec<Vec<(CityId, Distance)>> = Vec::new();
         for line in file_content.iter() {
             let cities_value: Vec<&str> = line.split(" = ").collect();
-            let city_names :Vec<&str> = cities_value[0].split(" to ").collect();
+            let city_names: Vec<&str> = cities_value[0].split(" to ").collect();
             let value = cities_value[1].parse::<f64>().unwrap();
             let city_1 = city_names[0];
             let city_2 = city_names[1];
@@ -95,7 +98,12 @@ fn main() -> io::Result<()> {
         while !visited.len() != cities.len() {
             visited.insert(current);
             let current_dijkstra = dijkstra_algorithm(current, &distances);
-            let mut dijkstra_with_indices: Vec<(f64, usize)> = current_dijkstra.iter().enumerate().filter(|(i, _)| !visited.contains(i)).map(|(x, y)| (*y, x)).collect();
+            let mut dijkstra_with_indices: Vec<(f64, usize)> = current_dijkstra
+                .iter()
+                .enumerate()
+                .filter(|(i, _)| !visited.contains(i))
+                .map(|(x, y)| (*y, x))
+                .collect();
             dijkstra_with_indices.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
             let (val, min_id) = if let Some((val, min_id)) = dijkstra_with_indices.first() {
                 (val, min_id)
@@ -114,7 +122,8 @@ fn main() -> io::Result<()> {
         for (i, edges) in distances.iter().enumerate() {
             for edge in edges.iter() {
                 let (destination, distance_to_destination) = edge;
-                    inverted_distances[i].push((*destination, Distance(1.0/distance_to_destination.0)));
+                inverted_distances[i]
+                    .push((*destination, Distance(1.0 / distance_to_destination.0)));
             }
         }
         let mut max_total_distance = 0_f64;
@@ -125,7 +134,12 @@ fn main() -> io::Result<()> {
             while !visited.len() != cities.len() {
                 visited.insert(current);
                 let current_dijkstra = dijkstra_algorithm(current, &inverted_distances);
-                let mut dijkstra_with_indices: Vec<(f64, usize)> = current_dijkstra.iter().enumerate().filter(|(i, _)| !visited.contains(i)).map(|(x, y)| (*y, x)).collect();
+                let mut dijkstra_with_indices: Vec<(f64, usize)> = current_dijkstra
+                    .iter()
+                    .enumerate()
+                    .filter(|(i, _)| !visited.contains(i))
+                    .map(|(x, y)| (*y, x))
+                    .collect();
                 dijkstra_with_indices.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
                 let (val, max_id) = if let Some((val, max_id)) = dijkstra_with_indices.first() {
                     (val, max_id)
@@ -135,7 +149,7 @@ fn main() -> io::Result<()> {
                 println!("Dijkstra: {:?}", current_dijkstra);
                 println!("maxId {}, Val {}", max_id, val);
                 current = *max_id;
-                total_distance += 1.0/current_dijkstra[current];
+                total_distance += 1.0 / current_dijkstra[current];
             }
             if total_distance > max_total_distance {
                 max_total_distance = total_distance;
