@@ -4,7 +4,7 @@ use std::io::{self};
 
 fn main() -> io::Result<()> {
     let files_results = vec![("test.txt", 2660, 1), ("input.txt", 2655, 1)];
-    for (f, result_1, result_2) in files_results.into_iter() {
+    for (f, result_1, _result_2) in files_results.into_iter() {
         println!("File: {}", f);
         let file_content: Vec<String> = std::fs::read_to_string(f)?
             .lines()
@@ -17,7 +17,7 @@ fn main() -> io::Result<()> {
         let mut reindeers: Vec<Reindeer> = Vec::new();
         for line in file_content.iter() {
             let caps = re.captures(&line).unwrap();
-            let name = caps.get(1).map_or("", |m| m.as_str());
+            let _name = caps.get(1).map_or("", |m| m.as_str());
             let speed = caps
                 .get(2)
                 .map_or("", |m| m.as_str())
