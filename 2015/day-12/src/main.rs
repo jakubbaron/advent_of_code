@@ -1,14 +1,14 @@
-use std::io::{self};
 use regex::Regex;
+use serde_json::{Result, Value};
 use std::cmp::{max, min};
 use std::collections::HashSet;
-use serde_json::{Result, Value};
+use std::io::{self};
 
 fn count_numbers(line: &str) -> i64 {
     let re = Regex::new(r"([-]?\d+)").unwrap();
-    re.find_iter(&line).map(|c| {
-        c.as_str().parse::<i64>().unwrap()
-    }).fold(0, |acc, val| acc + val)
+    re.find_iter(&line)
+        .map(|c| c.as_str().parse::<i64>().unwrap())
+        .fold(0, |acc, val| acc + val)
 }
 
 fn counter(vals: &Value, skip_red: bool) -> i64 {
@@ -26,16 +26,19 @@ fn counter(vals: &Value, skip_red: bool) -> i64 {
                 sum += counter(v, skip_red);
             }
             return sum;
-        },
+        }
         Value::Array(array) => {
-            return array.iter().map(|v| counter(v, skip_red)).fold(0, |acc, val| acc + val);
-        },
+            return array
+                .iter()
+                .map(|v| counter(v, skip_red))
+                .fold(0, |acc, val| acc + val);
+        }
         Value::Number(n) => {
             return n.as_i64().unwrap();
-        },
+        }
         _ => {
             return 0;
-        },
+        }
     }
 }
 
@@ -44,7 +47,7 @@ fn main() -> io::Result<()> {
         ("test.txt", 51, 49),
         ("test3.txt", 2942, 0),
         ("test4.txt", 6, 6),
-        ("input.txt", 111754, 65402)
+        ("input.txt", 111754, 65402),
     ];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
@@ -58,7 +61,6 @@ fn main() -> io::Result<()> {
         let v: Value = serde_json::from_str(line).unwrap();
         assert_eq!(counter(&v, true), result_1);
         assert_eq!(counter(&v, false), result_2);
-
     }
     Ok(())
 }
