@@ -4,29 +4,31 @@ use std::cmp::{max, min};
 use std::collections::HashSet;
 use serde_json::{Result, Value};
 
-fn count_numbers(line: &str) -> i32 {
+fn count_numbers(line: &str) -> i64 {
     let re = Regex::new(r"([-]?\d+)").unwrap();
     re.find_iter(&line).map(|c| {
-        c.as_str().parse::<i32>().unwrap()
+        c.as_str().parse::<i64>().unwrap()
     }).fold(0, |acc, val| acc + val)
 }
 
-fn counter(vals: &Value) -> i64 {
+fn counter(vals: &Value, skip_red: bool) -> i64 {
     match vals {
         Value::Object(map) => {
-            for (k, v) in map {
-                if v == &Value::String("red".to_string()) {
-                    return 0;
+            if !skip_red {
+                for (k, v) in map {
+                    if v == &Value::String("red".to_string()) {
+                        return 0;
+                    }
                 }
             }
             let mut sum = 0;
             for (k, v) in map {
-                sum += counter(v);
+                sum += counter(v, skip_red);
             }
             return sum;
         },
         Value::Array(array) => {
-            return array.iter().map(|v| counter(v)).fold(0, |acc, val| acc + val);
+            return array.iter().map(|v| counter(v, skip_red)).fold(0, |acc, val| acc + val);
         },
         Value::Number(n) => {
             return n.as_i64().unwrap();
@@ -54,7 +56,8 @@ fn main() -> io::Result<()> {
         assert_eq!(count_numbers(&line), result_1);
 
         let v: Value = serde_json::from_str(line).unwrap();
-        assert_eq!(counter(&v), result_2);
+        assert_eq!(counter(&v, true), result_1);
+        assert_eq!(counter(&v, false), result_2);
 
     }
     Ok(())
