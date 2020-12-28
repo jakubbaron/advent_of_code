@@ -33,7 +33,7 @@ fn permutations(mut vec: Vec<&str>, l: usize, r: usize) -> Vec<Vec<&str>> {
             vec[l] = vec[i];
             vec[i] = tmp;
 
-            vecs.extend(permutations(vec.to_vec(), l+1, r));
+            vecs.extend(permutations(vec.to_vec(), l + 1, r));
 
             let tmp = vec[l];
             vec[l] = vec[i];
