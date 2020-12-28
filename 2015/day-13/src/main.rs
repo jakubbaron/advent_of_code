@@ -23,22 +23,21 @@ fn get_happiness(names: &Vec<&str>, scores: &HashMap<&str, HashMap<&str, i32>>) 
     total_score
 }
 
-fn heap_permutation(mut vec: Vec<&str>, size: usize, n: usize) -> Vec<Vec<&str>> {
-    if size == 1 {
-        return vec![vec];
-    }
+fn permutations(mut vec: Vec<&str>, l: usize, r: usize) -> Vec<Vec<&str>> {
     let mut vecs: Vec<Vec<&str>> = Vec::new();
-    for i in 0..size {
-        vecs.extend(heap_permutation(vec.to_vec(), size - 1, n));
+    if r == l {
+        return vec![vec];
+    } else {
+        for i in l..=r {
+            let tmp = vec[l];
+            vec[l] = vec[i];
+            vec[i] = tmp;
 
-        if size % 2 == 1 {
-            let tmp = vec[0];
-            vec[0] = vec[size - 1];
-            vec[size - 1] = tmp;
-        } else {
-            let tmp = vec[i];
-            vec[i] = vec[size - 1];
-            vec[size - 1] = tmp;
+            vecs.extend(permutations(vec.to_vec(), l+1, r));
+
+            let tmp = vec[l];
+            vec[l] = vec[i];
+            vec[i] = tmp;
         }
     }
     vecs
@@ -80,7 +79,17 @@ fn main() -> io::Result<()> {
                 );
         }
 
-        let mut names: Vec<&str> = happiness.keys().cloned().collect();
+        let names: Vec<&str> = happiness.keys().cloned().collect();
+        let mut permuted = permutations(names[1..].to_vec(), 0, names.len() - 2);
+        for row in &mut permuted {
+            row.push(names[0]);
+        }
+        let mut max_score = 0;
+        for perm in permuted.iter() {
+            max_score = max(max_score, get_happiness(&perm, &happiness));
+        }
+        assert_eq!(max_score, result_1);
+
         happiness.entry("myself").or_insert_with(HashMap::new);
         for name in names.iter() {
             if name != &"myself" {
@@ -89,28 +98,13 @@ fn main() -> io::Result<()> {
                 });
             }
         }
-        // for (k,v) in happiness.iter() {
-        //     println!("{}", k);
-        //     for (k2, v2) in v.iter() {
-        //         println!("{}: {}", k2, v2);
-        //     }
-        // }
-        if let Some(pos) = names.iter().position(|x| x == &"myself") {
-            names.remove(pos);
-        }
-        let permuted = heap_permutation(names.to_vec(), names.len(), names.len());
-        let mut max_score = 0;
-        for perm in permuted.iter() {
-            // println!("{} {:?} {:?}", max_score, get_happiness(&perm, &happiness), perm);
-            max_score = max(max_score, get_happiness(&perm, &happiness));
-        }
-        assert_eq!(max_score, result_1);
-
         let names: Vec<&str> = happiness.keys().cloned().collect();
-        let permuted = heap_permutation(names.to_vec(), names.len(), names.len());
+        let mut permuted = permutations(names[1..].to_vec(), 0, names.len() - 2);
+        for row in &mut permuted {
+            row.push(names[0]);
+        }
         let mut max_score = 0;
         for perm in permuted.iter() {
-            // println!("{} {:?} {:?}", max_score, get_happiness(&perm, &happiness), perm);
             max_score = max(max_score, get_happiness(&perm, &happiness));
         }
         assert_eq!(max_score, result_2);
