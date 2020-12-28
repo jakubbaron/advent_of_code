@@ -1,10 +1,10 @@
-use day_14::Reindeer;
+use day_14::{get_max_points, race_reindeers, Reindeer};
 use regex::Regex;
 use std::io::{self};
 
 fn main() -> io::Result<()> {
-    let files_results = vec![("test.txt", 2660, 1), ("input.txt", 2655, 1)];
-    for (f, result_1, _result_2) in files_results.into_iter() {
+    let files_results = vec![("test.txt", 2660, 1564), ("input.txt", 2655, 1059)];
+    for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
         let file_content: Vec<String> = std::fs::read_to_string(f)?
             .lines()
@@ -35,13 +35,18 @@ fn main() -> io::Result<()> {
                 .unwrap();
             reindeers.push(Reindeer::new(speed, run_time, rest_time));
         }
+        let mut reindeers_2 = reindeers.to_vec();
+
         let mut times: Vec<u32> = Vec::new();
-        for reindeer in reindeers.iter() {
+        for reindeer in &mut reindeers {
             times.push(reindeer.run_for(2503));
         }
         let res_1 = *times.iter().max().unwrap();
         println!("Winning distance: {}", res_1);
         assert_eq!(res_1, result_1);
+
+        race_reindeers(&mut reindeers_2, 2503);
+        assert_eq!(get_max_points(&reindeers_2), result_2);
     }
     Ok(())
 }
