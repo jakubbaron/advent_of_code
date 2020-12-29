@@ -8,8 +8,22 @@ pub struct Spoon {
 }
 
 impl Spoon {
-    pub fn new(name: &str, capacity: i64, durability: i64, flavor: i64, texture: i64, calories: i64) -> Spoon {
-        Spoon{name: name.to_string(), capacity, durability, flavor, texture, calories }
+    pub fn new(
+        name: &str,
+        capacity: i64,
+        durability: i64,
+        flavor: i64,
+        texture: i64,
+        calories: i64,
+    ) -> Spoon {
+        Spoon {
+            name: name.to_string(),
+            capacity,
+            durability,
+            flavor,
+            texture,
+            calories,
+        }
     }
     pub fn as_vec(&self) -> Vec<i64> {
         vec![self.capacity, self.durability, self.flavor, self.texture]
@@ -55,7 +69,7 @@ mod tests {
     #[test]
     fn test_as_vec() {
         let s = Spoon::new("abc", 1, 2, 3, 4, 5);
-        assert_eq!(s.as_vec(), vec![1,2,3,4,5]);
+        assert_eq!(s.as_vec(), vec![1, 2, 3, 4, 5]);
     }
 
     #[test]
@@ -75,6 +89,5 @@ mod tests {
         let s = Spoon::new("abc", 2, 3, -2, -1, 3);
         v = add_spoon(&v, &s);
         assert_eq!(vec![70, 83, 150, 75], v);
-
     }
 }
