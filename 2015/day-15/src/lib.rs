@@ -1,10 +1,10 @@
 pub struct Spoon {
-    name: String,
+    _name: String,
     capacity: i64,
     durability: i64,
     flavor: i64,
     texture: i64,
-    calories: i64,
+    calories: usize,
 }
 
 impl Spoon {
@@ -14,10 +14,10 @@ impl Spoon {
         durability: i64,
         flavor: i64,
         texture: i64,
-        calories: i64,
+        calories: usize,
     ) -> Spoon {
         Spoon {
-            name: name.to_string(),
+            _name: name.to_string(),
             capacity,
             durability,
             flavor,
@@ -27,6 +27,9 @@ impl Spoon {
     }
     pub fn as_vec(&self) -> Vec<i64> {
         vec![self.capacity, self.durability, self.flavor, self.texture]
+    }
+    pub fn get_calories(&self) -> usize {
+        self.calories
     }
 }
 
@@ -69,7 +72,7 @@ mod tests {
     #[test]
     fn test_as_vec() {
         let s = Spoon::new("abc", 1, 2, 3, 4, 5);
-        assert_eq!(s.as_vec(), vec![1, 2, 3, 4, 5]);
+        assert_eq!(s.as_vec(), vec![1, 2, 3, 4]);
     }
 
     #[test]
