@@ -56,37 +56,36 @@ fn main() -> io::Result<()> {
         let mut min_changes = 0;
         while str_1 != str_2 {
             println!("Line remaining: {}, main_offset {}", str_2, main_offset);
-            let loop_no = std::cmp::min(longest_key_len, str_2.len());
-            let mut found_something = false;
-            for i in 0..loop_no {
-                let offset = if str_2.len() + i >= loop_no {
-                    str_2.len() + i - loop_no
+            let mut i = 0;
+            while i < longest_key_len {
+                let offset = if str_2.len() + i >= longest_key_len {
+                    str_2.len() + i - longest_key_len
                 } else {
                     str_2.len()
                 };
 
-                let beginning = if main_offset >= offset {
+                let beginning = if main_offset > offset {
                     0
                 } else {
                     offset - main_offset
                 };
-                let tmp_str = &str_2[beginning..str_2.len() - main_offset];
+                let end = str_2.len() - main_offset;
+                let tmp_str = &str_2[beginning..end];
                 match reversed.get(tmp_str) {
                     Some(val) => {
                         println!("Before {}", str_2);
                         println!("Replaced {} with {}", tmp_str, val);
-                        // str_2.replace_range(main_offset..main_offset + offset, val);
-                        str_2.replace_range(beginning..str_2.len() - main_offset, val);
+                        str_2.replace_range(beginning..end, val);
                         println!("After {}", str_2);
                         min_changes += 1;
-                        found_something = true;
                         main_offset = 0;
                         break;
                     }
                     None => (),
                 }
+                i += 1;
             }
-            if !found_something {
+            if i == longest_key_len {
                 main_offset += 1;
             }
         }
