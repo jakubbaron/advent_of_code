@@ -2,10 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::io::{self};
 
 fn main() -> io::Result<()> {
-    let files_results = vec![
-        ("test.txt", 7, 6),
-        ("input.txt", 535, 1)
-    ];
+    let files_results = vec![("test.txt", 7, 6), ("input.txt", 535, 212)];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
         let file_content: Vec<String> = std::fs::read_to_string(f)?
@@ -57,41 +54,34 @@ fn main() -> io::Result<()> {
         let longest_key_len = reversed.keys().map(|x| x.len()).max().unwrap();
         let mut main_offset = 0;
         let mut min_changes = 0;
-        // while str_1 != str_2 {
-        for _ in 0..1000 {
-            if main_offset + longest_key_len > str_2.len() {
-                main_offset = 0;
-            }
-            println!("Line remaining: {}", str_2);
-            // for i in 0..std::cmp::min(longest_key_len, str_2.len()) {
+        while str_1 != str_2 {
+            println!("Line remaining: {}, main_offset {}", str_2, main_offset);
             let loop_no = std::cmp::min(longest_key_len, str_2.len());
             let mut found_something = false;
             for i in 0..loop_no {
-                let offset = str_2.len() + i - loop_no;
-                let tmp_str = &str_2[offset-main_offset..str_2.len()-main_offset];
-                // let tmp_str = &str_2[main_offset..main_offset + offset];
-                // let offset = longest_key_len - i;
-                // let offset = std::cmp::min(longest_key_len, str_2.len()) - i;
-                println!("Main offset {} {}", main_offset, offset);
-                // println!("{}", tmp_str);
+                let offset = if str_2.len() + i >= loop_no {
+                    str_2.len() + i - loop_no
+                } else {
+                    str_2.len()
+                };
+
+                let beginning = if main_offset >= offset {
+                    0
+                } else {
+                    offset - main_offset
+                };
+                let tmp_str = &str_2[beginning..str_2.len() - main_offset];
                 match reversed.get(tmp_str) {
                     Some(val) => {
-                        if val == &"e" {
-                            let mut s = str_2.to_string();
-                            // s.replace_range(main_offset..main_offset + offset, val);
-                            s.replace_range(offset-main_offset..s.len() - main_offset, val);
-                            if s.len() != 1 {
-                                main_offset += 1;
-                                break;
-                            }
-                        }
                         println!("Before {}", str_2);
                         println!("Replaced {} with {}", tmp_str, val);
                         // str_2.replace_range(main_offset..main_offset + offset, val);
-                        str_2.replace_range(offset-main_offset..str_2.len()-main_offset, val);
+                        str_2.replace_range(beginning..str_2.len() - main_offset, val);
                         println!("After {}", str_2);
                         min_changes += 1;
                         found_something = true;
+                        main_offset = 0;
+                        break;
                     }
                     None => (),
                 }
