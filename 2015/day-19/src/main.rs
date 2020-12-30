@@ -3,8 +3,8 @@ use std::io::{self};
 
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 7, 1),
-        ("input.txt", ,535 1)
+        ("test.txt", 7, 6),
+        ("input.txt", 535, 1)
     ];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
@@ -46,6 +46,62 @@ fn main() -> io::Result<()> {
             }
         }
         assert_eq!(uniques.len(), result_1);
+
+        let reversed: HashMap<&str, &str> = substitutes
+            .iter()
+            .flat_map(|(&k, v)| v.iter().map(move |&vv| (vv, k)))
+            .collect();
+
+        let str_1 = "e";
+        let mut str_2 = molecule.to_string();
+        let longest_key_len = reversed.keys().map(|x| x.len()).max().unwrap();
+        let mut main_offset = 0;
+        let mut min_changes = 0;
+        // while str_1 != str_2 {
+        for _ in 0..1000 {
+            if main_offset + longest_key_len > str_2.len() {
+                main_offset = 0;
+            }
+            println!("Line remaining: {}", str_2);
+            // for i in 0..std::cmp::min(longest_key_len, str_2.len()) {
+            let loop_no = std::cmp::min(longest_key_len, str_2.len());
+            let mut found_something = false;
+            for i in 0..loop_no {
+                let offset = str_2.len() + i - loop_no;
+                let tmp_str = &str_2[offset-main_offset..str_2.len()-main_offset];
+                // let tmp_str = &str_2[main_offset..main_offset + offset];
+                // let offset = longest_key_len - i;
+                // let offset = std::cmp::min(longest_key_len, str_2.len()) - i;
+                println!("Main offset {} {}", main_offset, offset);
+                // println!("{}", tmp_str);
+                match reversed.get(tmp_str) {
+                    Some(val) => {
+                        if val == &"e" {
+                            let mut s = str_2.to_string();
+                            // s.replace_range(main_offset..main_offset + offset, val);
+                            s.replace_range(offset-main_offset..s.len() - main_offset, val);
+                            if s.len() != 1 {
+                                main_offset += 1;
+                                break;
+                            }
+                        }
+                        println!("Before {}", str_2);
+                        println!("Replaced {} with {}", tmp_str, val);
+                        // str_2.replace_range(main_offset..main_offset + offset, val);
+                        str_2.replace_range(offset-main_offset..str_2.len()-main_offset, val);
+                        println!("After {}", str_2);
+                        min_changes += 1;
+                        found_something = true;
+                    }
+                    None => (),
+                }
+            }
+            if !found_something {
+                main_offset += 1;
+            }
+        }
+        println!("Min changes: {}", min_changes);
+        assert_eq!(min_changes, result_2);
     }
     Ok(())
 }
