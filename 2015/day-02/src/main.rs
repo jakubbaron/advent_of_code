@@ -1,7 +1,10 @@
 use std::io::{self};
 
 fn get_dimensions(line: &str) -> (usize, usize, usize) {
-    let dimensions: Vec<usize> = line.split("x").map(|x| x.parse::<usize>().unwrap()).collect();
+    let dimensions: Vec<usize> = line
+        .split("x")
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     assert_eq!(dimensions.len(), 3);
     (dimensions[0], dimensions[1], dimensions[2])
 }
@@ -10,7 +13,7 @@ fn get_result_1(file_content: &Vec<String>) -> usize {
     let mut all_areas = 0;
     for line in file_content.iter() {
         let (l, w, h) = get_dimensions(&line);
-        let sizes = vec![l*w, l*h, w*h];
+        let sizes = vec![l * w, l * h, w * h];
         let smallest = *sizes.iter().min().unwrap();
         all_areas += sizes.into_iter().fold(smallest, |acc, val| acc + 2 * val);
     }
@@ -21,7 +24,7 @@ fn get_result_2(file_content: &Vec<String>) -> usize {
     let mut all_ribbon = 0;
     for line in file_content.iter() {
         let (l, w, h) = get_dimensions(&line);
-        let side_sizes = vec![2*l + 2*w, 2*l + 2*h, 2*w + 2*h];
+        let side_sizes = vec![2 * l + 2 * w, 2 * l + 2 * h, 2 * w + 2 * h];
         let smallest = *side_sizes.iter().min().unwrap();
         let volume = l * w * h;
         all_ribbon += smallest + volume;
