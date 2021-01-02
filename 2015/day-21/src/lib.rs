@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug)]
-pub enum ItemEnum{
+pub enum ItemEnum {
     Armor(Item),
     Weapon(Item),
     Ring(Item, Item),
@@ -16,11 +16,15 @@ pub struct Item {
 
 impl Item {
     pub fn new(damage: i64, armor: i64, cost: i64) -> Item {
-        Item{ damage, armor, cost }
+        Item {
+            damage,
+            armor,
+            cost,
+        }
     }
 
     pub fn zero_item() -> Item {
-        Item::new(0,0,0)
+        Item::new(0, 0, 0)
     }
 }
 
@@ -34,20 +38,26 @@ pub struct Character {
     rings: (Item, Item),
 }
 
-
 impl Character {
     pub fn new(hitpoints: i64, damage: i64, armor: i64) -> Character {
         let weapon_wield = Item::zero_item();
         let armor_wield = Item::zero_item();
         let rings = (Item::zero_item(), Item::zero_item());
-        Character{hitpoints, damage, armor, weapon_wield, armor_wield, rings}
+        Character {
+            hitpoints,
+            damage,
+            armor,
+            weapon_wield,
+            armor_wield,
+            rings,
+        }
     }
 
     pub fn from_map(values_map: &HashMap<&str, i64>) -> Character {
         let weapon_wield = Item::zero_item();
         let armor_wield = Item::zero_item();
         let rings = (Item::zero_item(), Item::zero_item());
-        Character{
+        Character {
             hitpoints: *values_map.get(&"Hit Points").unwrap(),
             damage: *values_map.get(&"Damage").unwrap(),
             armor: *values_map.get(&"Armor").unwrap(),
@@ -86,7 +96,7 @@ impl Character {
             ItemEnum::Weapon(new_weapon) => self.weapon_wield = *new_weapon,
             _ => {
                 println!("Trying to assing a NonWeapon as a Weapon");
-            },
+            }
         };
     }
 
@@ -95,7 +105,7 @@ impl Character {
             ItemEnum::Armor(new_armor) => self.armor_wield = *new_armor,
             _ => {
                 println!("Trying to assing a NonArmor as an Armor");
-            },
+            }
         };
     }
 
@@ -257,57 +267,61 @@ mod tests {
         player.add_rings(&rings);
         assert_eq!(player.get_total_cost(), 10 + 20 + 2 * 5);
     }
-
 }
 
 fn parse_item(line: &String) -> Item {
-    let splitted:Vec<&str> = line.split(" ").filter(|x| !x.is_empty()).collect();
-    let v: Vec<i64> = splitted[1..4].iter().map(|x| x.parse::<i64>().unwrap()).collect();
+    let splitted: Vec<&str> = line.split(" ").filter(|x| !x.is_empty()).collect();
+    let v: Vec<i64> = splitted[1..4]
+        .iter()
+        .map(|x| x.parse::<i64>().unwrap())
+        .collect();
     Item::new(v[1], v[2], v[0])
 }
 
-pub fn get_weapons_armors_rings(weapons_content: &Vec<String>) -> (Vec<Item>, Vec<Item>, Vec<Item>) {
-     enum Parser {
-         Weapons,
-         Armors,
-         Rings
-     };
-     let mut mode = Parser::Weapons;
-     let mut weapons: Vec<Item> = Vec::new();
-     let mut armors: Vec<Item> = Vec::new();
-     let mut rings: Vec<Item> = Vec::new();
-     for line in weapons_content.iter() {
-         match mode {
-             Parser::Weapons => {
-                 if line.starts_with("Weapons") {
-                     continue;
-                 }
-                 if line.is_empty() {
-                     mode = Parser::Armors;
-                     continue;
-                 }
-                 weapons.push(parse_item(&line));
-             },
-             Parser::Armors => {
-                 if line.starts_with("Armor") {
-                     continue;
-                 }
-                 if line.is_empty() {
-                     mode = Parser::Rings;
-                     continue;
-                 }
-                 armors.push(parse_item(&line));
-             }
-             Parser::Rings=> {
-                 if line.starts_with("Rings") {
-                     continue;
-                 }
-                 if line.is_empty() {
-                     break;
-                 }
-                 rings.push(parse_item(&line));
-             }
-         };
-     }
-     (weapons, armors, rings)
+pub fn get_weapons_armors_rings(
+    weapons_content: &Vec<String>,
+) -> (Vec<Item>, Vec<Item>, Vec<Item>) {
+    enum Parser {
+        Weapons,
+        Armors,
+        Rings,
+    };
+    let mut mode = Parser::Weapons;
+    let mut weapons: Vec<Item> = Vec::new();
+    let mut armors: Vec<Item> = Vec::new();
+    let mut rings: Vec<Item> = Vec::new();
+    for line in weapons_content.iter() {
+        match mode {
+            Parser::Weapons => {
+                if line.starts_with("Weapons") {
+                    continue;
+                }
+                if line.is_empty() {
+                    mode = Parser::Armors;
+                    continue;
+                }
+                weapons.push(parse_item(&line));
+            }
+            Parser::Armors => {
+                if line.starts_with("Armor") {
+                    continue;
+                }
+                if line.is_empty() {
+                    mode = Parser::Rings;
+                    continue;
+                }
+                armors.push(parse_item(&line));
+            }
+            Parser::Rings => {
+                if line.starts_with("Rings") {
+                    continue;
+                }
+                if line.is_empty() {
+                    break;
+                }
+                rings.push(parse_item(&line));
+            }
+        };
+    }
+    (weapons, armors, rings)
 }
