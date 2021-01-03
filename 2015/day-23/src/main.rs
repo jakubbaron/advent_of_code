@@ -1,6 +1,4 @@
-use day_23::{
-    execute_instructions, parse_instructions,
-};
+use day_23::{execute_instructions, parse_instructions};
 use std::collections::HashMap;
 use std::io::{self};
 

@@ -195,13 +195,3 @@ pub fn parse_instructions(file_content: &Vec<String>) -> Vec<Instruction> {
     }
     instructions
 }
-
-#[cfg(test)]
-mod tests {
-    
-
-    #[test]
-    fn test_register() {
-        assert!(false);
-    }
-}
