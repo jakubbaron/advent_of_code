@@ -198,7 +198,7 @@ pub fn parse_instructions(file_content: &Vec<String>) -> Vec<Instruction> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 
     #[test]
     fn test_register() {
