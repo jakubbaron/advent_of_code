@@ -1,33 +1,9 @@
-use std::collections::HashSet;
 use std::io::{self};
-
-fn sums_to(packages: &Vec<usize>, sought_sum: usize, reduce_size: usize) -> Vec<Vec<usize>> {
-    let mut combinations: Vec<Vec<usize>> = Vec::new();
-    for i in 0..=1 << packages.len() / reduce_size {
-        let mut t = i;
-        let mut s = 0;
-        let mut tmp_vec: Vec<usize> = Vec::new();
-        for package in packages.iter() {
-            if t % 2 == 1 {
-                s += *package;
-                tmp_vec.push(*package);
-                if s >= sought_sum {
-                    break;
-                }
-            }
-            t /= 2;
-        }
-        if s == sought_sum {
-            combinations.push(tmp_vec);
-        }
-    }
-    combinations
-}
+use itertools::Itertools;
 
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 1, 1),
-        ("input.txt", 1, 1)
+        ("input.txt", 10723906903_usize, 74850409)
     ];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("File: {}", f);
@@ -35,54 +11,27 @@ fn main() -> io::Result<()> {
             .lines()
             .map(|x| x.to_string())
             .collect();
-        let packages: Vec<usize> = file_content.into_iter().rev().map(|x| x.parse::<usize>().unwrap()).collect();
+        let packages: Vec<usize> = file_content.into_iter().map(|x| x.parse::<usize>().unwrap()).collect();
         let total_sum = packages.iter().fold(0, |acc, val| acc+val);
-        println!("Total_sum {}", total_sum);
-        let sought_sum = total_sum / 3;
-        let vectors = sums_to(&packages, sought_sum, 2);
-        println!("Sums len: {}", vectors.len());
-        let mut pairs: Vec<(Vec<usize>, Vec<usize>)> = Vec::new();
-        for v in vectors.iter() {
-            let mut tmp:HashSet<usize> = packages.clone().into_iter().collect();
-            for el in v.iter() {
-                tmp.remove(el);
+        let mut i = 1;
+        let mut res_1 = usize::MAX;
+        let mut res_2 = usize::MAX;
+        while i <= packages.len() {
+            for v in packages.iter().combinations(i) {
+                if v.iter().fold(0, |acc, val| acc + **val) * 4 == total_sum {
+                    res_2 = std::cmp::min(res_2, v.iter().fold(1, |acc, val| acc * **val));
+                }
+                if v.iter().fold(0, |acc, val| acc + **val) * 3 == total_sum {
+                    res_1 = std::cmp::min(res_1, v.iter().fold(1, |acc, val| acc * **val));
+                    break;
+                }
             }
-            let tmp: Vec<usize> = tmp.into_iter().collect();
-            for i in sums_to(&tmp, sought_sum, 1) {
-                pairs.push((v.clone(), i));
-            }
+            i += 1;
         }
-        println!("Pairs len: {}", pairs.len());
-        let mut triples: Vec<Vec<Vec<usize>>> = Vec::new();
-        for (p, v) in pairs.into_iter() {
-            let mut tmp:HashSet<usize> = packages.clone().into_iter().collect();
-            for el in v.iter() {
-                tmp.remove(el);
-            }
-            for el in p.iter() {
-                tmp.remove(el);
-            }
-            let tmp: Vec<usize> = tmp.into_iter().collect();
-            if tmp.iter().fold(0, |acc, val| acc + val) == sought_sum {
-                triples.push(vec![p, v, tmp]);
-            }
-        }
-        for el in triples.iter_mut() {
-            el.sort_by(|a, b| a.len().cmp(&b.len()));
-        }
-        println!("{:?}", triples.len());
-        let mut entanglement = (usize::MAX, usize::MAX);
-        for v in triples.iter() {
-            let g1 = &v[0];
-            let product = g1.iter().fold(1, |acc, val| acc * val);
-            if g1.len() < entanglement.0 {
-                entanglement = (g1.len(), product);
-            } else if g1.len() == entanglement.0 && product < entanglement.1 {
-                entanglement = (g1.len(), product);
-            }
-        }
-        println!("{:?}", entanglement);
-
+        println!("Res 1: {}", res_1);
+        assert_eq!(res_1, result_1);
+        println!("Res 2: {}", res_2);
+        assert_eq!(res_2, result_2);
     }
     Ok(())
 }
