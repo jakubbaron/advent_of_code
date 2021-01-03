@@ -250,9 +250,7 @@ mod tests {
     fn test_full_fight() {
         let mut boss = Character::new(12, 7, 2);
         let mut player = Character::new(8, 5, 5);
-        assert!(full_fight_won_by_player(&mut player, &mut boss));
-        assert!(boss.is_defeated());
-        assert!(!player.is_defeated());
+        assert!(full_fight_won_by_player(player, boss));
     }
 
     #[test]
@@ -280,15 +278,15 @@ fn parse_item(line: &String) -> Item {
 
 pub fn get_weapons_armors_rings(
     weapons_content: &Vec<String>,
-) -> (Vec<Item>, Vec<Item>, Vec<Item>) {
+) -> (Vec<ItemEnum>, Vec<ItemEnum>, Vec<Item>) {
     enum Parser {
         Weapons,
         Armors,
         Rings,
     };
     let mut mode = Parser::Weapons;
-    let mut weapons: Vec<Item> = Vec::new();
-    let mut armors: Vec<Item> = Vec::new();
+    let mut weapons: Vec<ItemEnum> = Vec::new();
+    let mut armors: Vec<ItemEnum> = vec![ItemEnum::Armor(Item::zero_item())];
     let mut rings: Vec<Item> = Vec::new();
     for line in weapons_content.iter() {
         match mode {
@@ -300,7 +298,7 @@ pub fn get_weapons_armors_rings(
                     mode = Parser::Armors;
                     continue;
                 }
-                weapons.push(parse_item(&line));
+                weapons.push(ItemEnum::Weapon(parse_item(&line)));
             }
             Parser::Armors => {
                 if line.starts_with("Armor") {
@@ -310,7 +308,7 @@ pub fn get_weapons_armors_rings(
                     mode = Parser::Rings;
                     continue;
                 }
-                armors.push(parse_item(&line));
+                armors.push(ItemEnum::Armor(parse_item(&line)));
             }
             Parser::Rings => {
                 if line.starts_with("Rings") {

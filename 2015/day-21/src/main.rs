@@ -28,10 +28,10 @@ fn main() -> io::Result<()> {
         let mut current_min_cost = i64::MAX;
         let mut current_max_cost = i64::MIN;
 
-        // This approach doesn't cover scenarios if no weapon is wielded
+        // Must wield a weapon
         for weapon in weapons.iter() {
             let mut player_w = player.clone();
-            player_w.add_weapon(&ItemEnum::Weapon(*weapon));
+            player_w.add_weapon(weapon);
             let cost = player_w.get_total_cost();
             if full_fight_won_by_player(player_w.clone(), boss.clone()) {
                 if cost < current_min_cost {
@@ -44,7 +44,7 @@ fn main() -> io::Result<()> {
             }
             for armor in armors.iter() {
                 let mut player_wa = player_w.clone();
-                player_wa.add_armor(&ItemEnum::Armor(*armor));
+                player_wa.add_armor(armor);
                 let cost = player_wa.get_total_cost();
                 if full_fight_won_by_player(player_wa.clone(), boss.clone()) {
                     if cost < current_min_cost {
