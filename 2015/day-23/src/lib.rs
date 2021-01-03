@@ -138,6 +138,61 @@ impl JumpIfOne {
     }
 }
 
+pub fn execute_instructions(instructions: &Vec<Instruction>, registers: &mut HashMap<char, usize>) -> usize {
+    let mut i = 0;
+    while i < instructions.len() {
+        i = match &instructions[i] {
+            Instruction::HLF(s) => s.execute(registers, i),
+            Instruction::TPL(s) => s.execute(registers, i),
+            Instruction::INC(s) => s.execute(registers, i),
+            Instruction::JMP(s) => s.execute(registers, i),
+            Instruction::JIE(s) => s.execute(registers, i),
+            Instruction::JIO(s) => s.execute(registers, i),
+        }
+    }
+    println!("{:?}", registers);
+    *registers.get(&'b').unwrap()
+}
+
+pub fn parse_instructions(file_content: &Vec<String>) -> Vec<Instruction> {
+    let mut instructions: Vec<Instruction> = Vec::new();
+    for line in file_content.iter() {
+        let splitted: Vec<&str> = line.split(" ").collect();
+        let register = splitted[1].replace(",", "").chars().collect::<Vec<char>>()[0];
+
+        instructions.push(match splitted[0] {
+            "hlf" => Instruction::HLF(Half::new(register)),
+            "tpl" => Instruction::TPL(Tripple::new(register)),
+            "inc" => Instruction::INC(Increment::new(register)),
+            "jmp" => {
+                let parsed = match splitted[1].parse::<i64>() {
+                    Ok(val) => val,
+                    Err(e) => panic!("Wrong instruction for jmp {}", e),
+                };
+                Instruction::JMP(Jump::new(parsed))
+            }
+            "jie" => {
+                let parsed = match splitted[2].parse::<i64>() {
+                    Ok(val) => val,
+                    Err(e) => panic!("Wrong instruction for jie {}", e),
+                };
+                Instruction::JIE(JumpIfEven::new(register, parsed))
+            }
+            "jio" => {
+                let parsed = match splitted[2].parse::<i64>() {
+                    Ok(val) => val,
+                    Err(e) => panic!("Wrong instruction for jio {}", e),
+                };
+                Instruction::JIO(JumpIfOne::new(register, parsed))
+            }
+            _ => {
+                panic!("Unexpected instruction {}", splitted[0]);
+            }
+        });
+    }
+    instructions
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
