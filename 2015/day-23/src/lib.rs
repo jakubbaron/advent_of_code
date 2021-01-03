@@ -138,7 +138,10 @@ impl JumpIfOne {
     }
 }
 
-pub fn execute_instructions(instructions: &Vec<Instruction>, registers: &mut HashMap<char, usize>) -> usize {
+pub fn execute_instructions(
+    instructions: &Vec<Instruction>,
+    registers: &mut HashMap<char, usize>,
+) -> usize {
     let mut i = 0;
     while i < instructions.len() {
         i = match &instructions[i] {
