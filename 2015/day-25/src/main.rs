@@ -1,9 +1,7 @@
 use std::io::{self};
 
 fn main() -> io::Result<()> {
-    let files_results = vec![
-        ("input.txt", 2650453)
-    ];
+    let files_results = vec![("input.txt", 2650453)];
     for (f, result_1) in files_results.into_iter() {
         println!("File: {}", f);
         let sought_row = 2978;
