@@ -1,14 +1,7 @@
 use std::io::{self};
 
 fn main() -> io::Result<()> {
-    let files_results = vec![
-        ("test.txt", 7, 5),
-        (
-            "input.txt",
-            1288,
-            1311,
-        ),
-    ];
+    let files_results = vec![("test.txt", 7, 5), ("input.txt", 1288, 1311)];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("{}", f);
         let file_content: Vec<u32> = std::fs::read_to_string(f)?
@@ -17,7 +10,7 @@ fn main() -> io::Result<()> {
             .collect();
         let mut res_1 = 0;
         for i in 1..file_content.len() {
-            if file_content[i] > file_content[i-1] {
+            if file_content[i] > file_content[i - 1] {
                 res_1 += 1;
             }
         }
@@ -32,7 +25,7 @@ fn main() -> io::Result<()> {
             }
         }
         for i in 3..helper.len() {
-            if helper[i] > helper[i-1] {
+            if helper[i] > helper[i - 1] {
                 res_2 += 1;
             }
         }
