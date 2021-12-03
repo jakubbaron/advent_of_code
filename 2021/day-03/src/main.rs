@@ -51,58 +51,40 @@ fn part_1(file_content: &Vec<String>) -> i32 {
     gamma * epsilon
 }
 
+fn narrow_down_string_bits(pool: &Vec<String>, method: fn(&Vec<i32>) -> Vec<i32>) -> i32 {
+    let mut current_pool = pool.clone();
+    let length = pool[0].len();
+    for ch_idx in 0..length {
+        let tmp = method(&count_collection(&current_pool));
+        let mut tmp_pool: Vec<String> = vec![];
+        let ch = tmp[ch_idx].to_string();
+        for line in current_pool.iter() {
+            let vec_line: Vec<String> = line.chars().map(|x| x.to_string()).collect();
+            if vec_line[ch_idx] == ch {
+                tmp_pool.push(line.clone());
+            }
+        }
+        current_pool = tmp_pool;
+        if current_pool.len() == 1 {
+            break;
+        }
+    }
+    vec_to_dec(
+        &current_pool[0]
+            .chars()
+            .map(|x| x.to_string().parse::<i32>().unwrap())
+            .collect(),
+    )
+}
+
 fn part_2(file_content: &Vec<String>) -> i32 {
-    let mut current_pool = file_content.clone();
-    for ch_idx in 0..file_content[0].len() {
-        let tmp = most_significant(&count_collection(&current_pool));
-        let mut tmp_pool: Vec<String> = vec![];
-        let ch = tmp[ch_idx].to_string();
-        for line in current_pool.iter() {
-            let vec_line: Vec<String> = line.chars().map(|x| x.to_string()).collect();
-            if vec_line[ch_idx] == ch {
-                tmp_pool.push(line.clone());
-            }
-        }
-        current_pool = tmp_pool;
-        if current_pool.len() == 1 {
-            break;
-        }
-    }
-    let oxygen = vec_to_dec(
-        &current_pool[0]
-            .chars()
-            .map(|x| x.to_string().parse::<i32>().unwrap())
-            .collect(),
-    );
-    println!("{}", oxygen);
-    let mut current_pool = file_content.clone();
-    for ch_idx in 0..file_content[0].len() {
-        let tmp = least_significant(&count_collection(&current_pool));
-        let mut tmp_pool: Vec<String> = vec![];
-        let ch = tmp[ch_idx].to_string();
-        for line in current_pool.iter() {
-            let vec_line: Vec<String> = line.chars().map(|x| x.to_string()).collect();
-            if vec_line[ch_idx] == ch {
-                tmp_pool.push(line.clone());
-            }
-        }
-        current_pool = tmp_pool;
-        if current_pool.len() == 1 {
-            break;
-        }
-    }
-    let co2 = vec_to_dec(
-        &current_pool[0]
-            .chars()
-            .map(|x| x.to_string().parse::<i32>().unwrap())
-            .collect(),
-    );
-    println!("{}", co2);
+    let oxygen = narrow_down_string_bits(&file_content, most_significant);
+    let co2 = narrow_down_string_bits(&file_content, least_significant);
     oxygen * co2
 }
 
 fn main() -> io::Result<()> {
-    let files_results = vec![("test.txt", 198, 230), ("input.txt", 4103154, 1311)];
+    let files_results = vec![("test.txt", 198, 230), ("input.txt", 4103154, 4245351)];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("{}", f);
         let file_content: Vec<String> = std::fs::read_to_string(f)?
