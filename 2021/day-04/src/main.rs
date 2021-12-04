@@ -41,7 +41,6 @@ fn check_board(board: &Vec<Vec<i32>>) -> bool {
         for j in 0..board.len() {
             tmp_row[j] = board[j][i];
         }
-        println!("{:?}", tmp_row);
         if check_row(&tmp_row) {
             return true;
         }
@@ -61,7 +60,6 @@ fn display_board(board: &Vec<Vec<i32>>) {
 
 fn part_1(file_content: &Vec<String>) -> i32 {
     let (numbers, boards) = parse_input(&file_content);
-    println!("{:?}", boards);
     let mut markers = boards.clone();
     for number in numbers.iter() {
         for board_id in 0..boards.len() {
@@ -71,10 +69,6 @@ fn part_1(file_content: &Vec<String>) -> i32 {
                     if &board[i][j] == number {
                         markers[board_id][i][j] = 0;
                         if check_board(&markers[board_id]) {
-                            println!("Board ID {:?}", board_id);
-                            println!("number {:?}", number);
-                            display_board(&boards[board_id]);
-                            display_board(&markers[board_id]);
                             let count = count_unmarked(&markers[board_id]);
                             return count * number;
                         }
@@ -87,11 +81,36 @@ fn part_1(file_content: &Vec<String>) -> i32 {
 }
 
 fn part_2(file_content: &Vec<String>) -> i32 {
-    0
+    let (numbers, boards) = parse_input(&file_content);
+    let mut markers = boards.clone();
+    let mut winner_boards: Vec<usize> = vec![];
+    for number in numbers.iter() {
+        for board_id in 0..boards.len() {
+            if winner_boards.contains(&board_id) {
+                continue;
+            }
+            let board = &boards[board_id];
+            for i in 0..board[0].len() {
+                for j in 0..board[i].len() {
+                    if &board[i][j] == number {
+                        markers[board_id][i][j] = 0;
+                        if check_board(&markers[board_id]) {
+                            winner_boards.push(board_id);
+                            if winner_boards.len() == boards.len() {
+                                let count = count_unmarked(&markers[board_id]);
+                                return count * number;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    -1
 }
 
 fn main() -> io::Result<()> {
-    let files_results = vec![("test.txt", 4512, 230), ("input.txt", 58374, 4245351)];
+    let files_results = vec![("test.txt", 4512, 1924), ("input.txt", 58374, 11377)];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("{}", f);
         let file_content: Vec<String> = std::fs::read_to_string(f)?
@@ -101,8 +120,8 @@ fn main() -> io::Result<()> {
         let res_1 = part_1(&file_content);
         assert_eq!(res_1, result_1);
 
-        // let res_2 = part_2(&file_content);
-        // assert_eq!(res_2, result_2);
+        let res_2 = part_2(&file_content);
+        assert_eq!(res_2, result_2);
     }
     Ok(())
 }
