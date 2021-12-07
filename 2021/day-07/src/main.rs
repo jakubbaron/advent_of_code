@@ -2,8 +2,6 @@ use std::cmp::min;
 use std::collections::HashMap;
 use std::io::{self};
 
-//let entry = hashmap.entry(p).or_insert(0);
-//*entry += 1;
 fn parse_input(file_content: &Vec<String>) -> Vec<i32> {
     file_content[0]
         .split(",")
@@ -38,12 +36,10 @@ fn part_2(file_content: &Vec<String>) -> i32 {
     let mut helper: HashMap<i32, i32> = HashMap::new();
     let mut current_min = i32::MAX;
     for pos in 0..max_el {
-        for i in 0..data.len() {
-            let curr_el = data[i];
+        for curr_el in data.iter() {
             let entry = helper.entry(pos).or_insert(0);
-            for x in 1..=(curr_el - pos).abs() {
-                *entry += x;
-            }
+            let diff = (curr_el - pos).abs();
+            *entry += (diff * (diff + 1)) / 2;
         }
         current_min = min(current_min, *helper.values().min().unwrap());
     }
