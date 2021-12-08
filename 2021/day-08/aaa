@@ -1,0 +1,50 @@
+  0:      1:      2:      3:      4:
+ aaaa    ....    aaaa    aaaa    ....
+b    c  .    c  .    c  .    c  b    c
+b    c  .    c  .    c  .    c  b    c
+ ....    ....    dddd    dddd    dddd
+e    f  .    f  e    .  .    f  .    f
+e    f  .    f  e    .  .    f  .    f
+ gggg    ....    gggg    gggg    ....
+
+  5:      6:      7:      8:      9:
+ aaaa    aaaa    aaaa    aaaa    aaaa
+b    .  b    .  .    c  b    c  b    c
+b    .  b    .  .    c  b    c  b    c
+ dddd    dddd    ....    dddd    dddd
+.    f  e    f  .    f  e    f  .    f
+.    f  e    f  .    f  e    f  .    f
+ gggg    gggg    ....    gggg    gggg
+
+
+ dddd
+e    a
+e    a
+ ffff
+g    b
+g    b
+ cccc
+
+ aaaa
+b    c
+b    c
+ dddd
+e    f
+e    f
+ gggg
+
+a -> d
+b -> e
+c -> b !!
+d -> f
+e -> g
+f -> a !!
+g -> c
+
+a -> d
+b -> e
+c -> a
+d -> f
+e -> g
+f -> b
+g -> c
