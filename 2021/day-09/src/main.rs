@@ -13,20 +13,10 @@ fn parse_input(file_content: &Vec<String>) -> Vec<Vec<i32>> {
 }
 
 fn get_neighbours(data: &Vec<Vec<i32>>, i: usize, j: usize) -> Vec<i32> {
-    let mut output: Vec<i32> = vec![];
-    if i > 0 {
-        output.push(data[i - 1][j]);
-    }
-    if i < data.len() - 1 {
-        output.push(data[i + 1][j]);
-    }
-    if j > 0 {
-        output.push(data[i][j - 1]);
-    }
-    if j < data[i].len() - 1 {
-        output.push(data[i][j + 1]);
-    }
-    output
+    get_neighbours_coords(&data, i, j)
+        .into_iter()
+        .map(|(ii, jj)| data[ii][jj])
+        .collect()
 }
 
 fn part_1(file_content: &Vec<String>) -> i32 {
@@ -100,7 +90,9 @@ fn part_2(file_content: &Vec<String>) -> i32 {
     // println!("Part 2 outputs: {:?}", outputs);
 
     outputs.sort();
-    outputs[outputs.len() - 3..].iter().fold(1, |acc, val| acc*val)
+    outputs[outputs.len() - 3..]
+        .iter()
+        .fold(1, |acc, val| acc * val)
 }
 
 fn main() -> io::Result<()> {
