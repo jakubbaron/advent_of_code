@@ -47,11 +47,9 @@ fn get_neighbours(state: &Vec<Vec<i32>>, i: usize, j: usize) -> Vec<(usize, usiz
 }
 
 fn bump_energies(state: &mut Vec<Vec<i32>>) {
-    for i in 0..state.len() {
-        for j in 0..state[i].len() {
-            state[i][j] += 1;
-        }
-    }
+    state
+        .iter_mut()
+        .for_each(|row| row.iter_mut().for_each(|el| *el += 1))
 }
 fn print_state(i: usize, state: &Vec<Vec<i32>>) {
     println!("Step {}", i);
@@ -84,10 +82,7 @@ fn iterate_flash(state: &mut Vec<Vec<i32>>) -> HashSet<(usize, usize)> {
     flashed
 }
 fn clean_flashed(state: &mut Vec<Vec<i32>>, flashed: &HashSet<(usize, usize)>) {
-    for coords in flashed.iter() {
-        let (i, j) = *coords;
-        state[i][j] = 0;
-    }
+    flashed.iter().for_each(|&(i, j)| state[i][j] = 0)
 }
 
 fn part_1(file_content: &Vec<String>) -> usize {
