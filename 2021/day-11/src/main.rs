@@ -85,8 +85,8 @@ fn iterate_flash(state: &mut Vec<Vec<i32>>) -> HashSet<(usize, usize)> {
 }
 fn clean_flashed(state: &mut Vec<Vec<i32>>, flashed: &HashSet<(usize, usize)>) {
     for coords in flashed.iter() {
-        let (i, j) = &coords;
-        state[*i][*j] = 0;
+        let (i, j) = *coords;
+        state[i][j] = 0;
     }
 }
 
