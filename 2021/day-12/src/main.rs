@@ -59,7 +59,7 @@ fn count_all_paths(
         return 1;
     }
 
-    let mut current_path = path.clone();
+    let mut current_path = path.to_vec();
     current_path.push(start);
     if method(&current_path) {
         return 0;
