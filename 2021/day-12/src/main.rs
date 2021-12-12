@@ -61,7 +61,7 @@ fn count_all_paths(
 
     let mut current_path = path.to_vec();
     current_path.push(start);
-    if method(&current_path) {
+    if is_lowercase(start) && method(&current_path) {
         return 0;
     }
 
