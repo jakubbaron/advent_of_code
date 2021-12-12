@@ -7,13 +7,9 @@ fn get_graph(file_content: &Vec<String>) -> HashMap<&str, Vec<&str>> {
         let splitted: Vec<_> = line.split("-").collect::<Vec<_>>();
         let start = splitted[0];
         let end = splitted[1];
-        let entry = output
-            .entry(start)
-            .or_insert(vec![]);
+        let entry = output.entry(start).or_insert(vec![]);
         entry.push(end);
-        let entry = output
-            .entry(end)
-            .or_insert(vec![]);
+        let entry = output.entry(end).or_insert(vec![]);
         entry.push(start);
     }
     output.remove("end");
@@ -30,35 +26,26 @@ fn is_lowercase(edge: &str) -> bool {
 }
 
 fn is_small_cave_visited_twice(current_path: &Vec<&str>) -> bool {
-    let mut duplicates: HashSet<&str> = HashSet::new();
+    let mut duplicates: HashSet<_> = HashSet::new();
     for entry in current_path.iter().filter(|x| is_lowercase(x)) {
         if duplicates.contains(entry) {
             return true;
         }
-        duplicates.insert(entry.clone());
+        duplicates.insert(entry);
     }
     false
 }
 
 fn more_than_one_small_cave_visited_twice(current_path: &Vec<&str>) -> bool {
-    let mut duplicates: HashMap<&str, usize> = HashMap::new();
+    let mut duplicates: HashMap<_, _> = HashMap::new();
     for entry in current_path.iter().filter(|x| is_lowercase(x)) {
         let entry = duplicates.entry(entry).or_insert(0);
         *entry += 1;
-    }
-    let mut double_counts = 0;
-    for value in duplicates.values() {
-        if *value > 2 {
-            return true;
-        }
-        if *value == 2 {
-            double_counts += 1;
-        }
-        if double_counts == 2 {
+        if *entry > 2 {
             return true;
         }
     }
-    false
+    duplicates.values().filter(|&x| *x == 2).count() > 1
 }
 
 fn count_all_paths(
@@ -68,45 +55,37 @@ fn count_all_paths(
     path: &Vec<&str>,
     method: fn(&Vec<&str>) -> bool,
 ) -> usize {
+    if start == end {
+        return 1;
+    }
+
     let mut current_path = path.clone();
     current_path.push(start);
     if method(&current_path) {
         return 0;
     }
-    if start == end {
-        return 1;
-    }
-    if !graph.contains_key(start) {
-        return 0;
-    }
 
-    let mut counter = 0;
-    for node in graph[start].iter() {
-        counter += count_all_paths(&graph, node, end, &current_path, method);
-    }
-    counter
+    graph[start].iter().fold(0, |acc, node| {
+        acc + count_all_paths(&graph, node, end, &current_path, method)
+    })
 }
 
 fn part_1(file_content: &Vec<String>) -> usize {
-    let graph = get_graph(&file_content);
-    let empty_path = vec![];
     count_all_paths(
-        &graph,
+        &get_graph(&file_content),
         "start",
         "end",
-        &empty_path,
+        &Vec::new(),
         is_small_cave_visited_twice,
     )
 }
 
 fn part_2(file_content: &Vec<String>) -> usize {
-    let graph = get_graph(&file_content);
-    let empty_path = vec![];
     count_all_paths(
-        &graph,
+        &get_graph(&file_content),
         "start",
         "end",
-        &empty_path,
+        &Vec::new(),
         more_than_one_small_cave_visited_twice,
     )
 }
