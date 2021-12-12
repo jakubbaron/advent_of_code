@@ -1,20 +1,20 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::io::{self};
 
-fn get_graph(file_content: &Vec<String>) -> HashMap<String, VecDeque<String>> {
-    let mut output: HashMap<String, VecDeque<String>> = HashMap::new();
+fn get_graph(file_content: &Vec<String>) -> HashMap<&str, Vec<&str>> {
+    let mut output: HashMap<_, _> = HashMap::new();
     for line in file_content.iter() {
         let splitted: Vec<_> = line.split("-").collect::<Vec<_>>();
         let start = splitted[0];
         let end = splitted[1];
         let entry = output
-            .entry(start.to_string())
-            .or_insert(VecDeque::from(vec![]));
-        entry.push_back(end.to_string());
+            .entry(start)
+            .or_insert(vec![]);
+        entry.push(end);
         let entry = output
-            .entry(end.to_string())
-            .or_insert(VecDeque::from(vec![]));
-        entry.push_back(start.to_string());
+            .entry(end)
+            .or_insert(vec![]);
+        entry.push(start);
     }
     output.remove("end");
     for (_k, v) in output.iter_mut() {
@@ -25,12 +25,12 @@ fn get_graph(file_content: &Vec<String>) -> HashMap<String, VecDeque<String>> {
     output
 }
 
-fn is_lowercase(edge: &String) -> bool {
+fn is_lowercase(edge: &str) -> bool {
     edge.chars().all(|c| c.is_ascii_lowercase())
 }
 
-fn is_small_cave_visited_twice(current_path: &Vec<String>) -> bool {
-    let mut duplicates: HashSet<String> = HashSet::new();
+fn is_small_cave_visited_twice(current_path: &Vec<&str>) -> bool {
+    let mut duplicates: HashSet<&str> = HashSet::new();
     for entry in current_path.iter().filter(|x| is_lowercase(x)) {
         if duplicates.contains(entry) {
             return true;
@@ -40,10 +40,10 @@ fn is_small_cave_visited_twice(current_path: &Vec<String>) -> bool {
     false
 }
 
-fn more_than_one_small_cave_visited_twice(current_path: &Vec<String>) -> bool {
-    let mut duplicates: HashMap<String, usize> = HashMap::new();
+fn more_than_one_small_cave_visited_twice(current_path: &Vec<&str>) -> bool {
+    let mut duplicates: HashMap<&str, usize> = HashMap::new();
     for entry in current_path.iter().filter(|x| is_lowercase(x)) {
-        let entry = duplicates.entry(entry.to_string()).or_insert(0);
+        let entry = duplicates.entry(entry).or_insert(0);
         *entry += 1;
     }
     let mut double_counts = 0;
@@ -61,59 +61,54 @@ fn more_than_one_small_cave_visited_twice(current_path: &Vec<String>) -> bool {
     false
 }
 
-fn find_all_paths(
-    graph: &HashMap<String, VecDeque<String>>,
-    start: &String,
-    end: &String,
-    path: &Vec<String>,
-    method: fn(&Vec<String>) -> bool,
-) -> Vec<Vec<String>> {
+fn count_all_paths(
+    graph: &HashMap<&str, Vec<&str>>,
+    start: &str,
+    end: &str,
+    path: &Vec<&str>,
+    method: fn(&Vec<&str>) -> bool,
+) -> usize {
     let mut current_path = path.clone();
-    current_path.push(start.to_string());
+    current_path.push(start);
     if method(&current_path) {
-        return vec![];
+        return 0;
     }
     if start == end {
-        return vec![current_path.clone()];
+        return 1;
     }
     if !graph.contains_key(start) {
-        return vec![];
+        return 0;
     }
 
-    let mut paths: Vec<Vec<String>> = vec![];
+    let mut counter = 0;
     for node in graph[start].iter() {
-        let new_paths = find_all_paths(&graph, node, end, &current_path, method);
-        for p in new_paths {
-            paths.push(p)
-        }
+        counter += count_all_paths(&graph, node, end, &current_path, method);
     }
-    paths
+    counter
 }
 
 fn part_1(file_content: &Vec<String>) -> usize {
     let graph = get_graph(&file_content);
     let empty_path = vec![];
-    let paths = find_all_paths(
+    count_all_paths(
         &graph,
-        &String::from("start"),
-        &String::from("end"),
+        "start",
+        "end",
         &empty_path,
         is_small_cave_visited_twice,
-    );
-    paths.len()
+    )
 }
 
 fn part_2(file_content: &Vec<String>) -> usize {
     let graph = get_graph(&file_content);
     let empty_path = vec![];
-    let paths = find_all_paths(
+    count_all_paths(
         &graph,
-        &String::from("start"),
-        &String::from("end"),
+        "start",
+        "end",
         &empty_path,
         more_than_one_small_cave_visited_twice,
-    );
-    paths.len()
+    )
 }
 
 fn main() -> io::Result<()> {
