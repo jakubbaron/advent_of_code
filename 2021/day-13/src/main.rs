@@ -98,28 +98,26 @@ fn parse_input(file_content: &Vec<String>) -> (Vec<Coord>, Vec<Fold>) {
     (coords, folds)
 }
 
-fn part_1(file_content: &Vec<String>) -> usize {
-    let (coords, folds) = parse_input(&file_content);
+fn prepare_paper(coords: &Vec<Coord>) -> Paper {
     let max_x = *coords.iter().map(|Coord { x, y: _ }| x).max().unwrap() + 1;
     let max_y = *coords.iter().map(|Coord { x: _, y }| y).max().unwrap() + 1;
     let mut paper = Paper::new(max_x, max_y);
     for coord in coords.iter() {
         paper.mark(coord);
     }
+    paper
+}
 
+fn part_1(file_content: &Vec<String>) -> usize {
+    let (coords, folds) = parse_input(&file_content);
+    let mut paper = prepare_paper(&coords);
     paper.fold(&folds[0]);
     paper.count_dots()
 }
 
 fn part_2(file_content: &Vec<String>) {
     let (coords, folds) = parse_input(&file_content);
-    let max_x = *coords.iter().map(|Coord { x, y: _ }| x).max().unwrap() + 1;
-    let max_y = *coords.iter().map(|Coord { x: _, y }| y).max().unwrap() + 1;
-    let mut paper = Paper::new(max_x, max_y);
-    for coord in coords.iter() {
-        paper.mark(coord);
-    }
-
+    let mut paper = prepare_paper(&coords);
     for fold in folds.iter() {
         paper.fold(fold);
     }
