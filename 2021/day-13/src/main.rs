@@ -22,10 +22,7 @@ struct Paper {
 impl Paper {
     fn show(&self) {
         for x in 0..self.max_x {
-            for y in 0..self.max_y {
-                print!("{}", self.board[x][y]);
-            }
-            println!("");
+            println!("{}", self.board[x][..self.max_y].iter().collect::<String>())
         }
     }
     fn new(max_x: usize, max_y: usize) -> Paper {
@@ -37,8 +34,8 @@ impl Paper {
         }
     }
     fn mark(&mut self, coord: &Coord) {
-        let Coord { x, y } = coord;
-        self.board[*x][*y] = '#';
+        let Coord { x, y } = *coord;
+        self.board[x][y] = '#';
     }
     fn fold(&mut self, fold: &Fold) {
         let Fold { axis, pos } = *fold;
