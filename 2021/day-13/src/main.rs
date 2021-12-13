@@ -107,15 +107,7 @@ fn part_1(file_content: &Vec<String>) -> usize {
         paper.mark(coord);
     }
 
-    // paper.show();
-
-    // println!("");
     paper.fold(&folds[0]);
-    // paper.show();
-
-    // paper.fold(&folds[1]);
-    // println!("");
-    // paper.show();
     paper.count_dots()
 }
 
