@@ -1,39 +1,60 @@
 use std::collections::HashMap;
 use std::io::{self};
 
-fn parse_input(file_content: &Vec<String>) -> (String, HashMap<&str, &str>) {
+fn parse_input(file_content: &Vec<String>) -> (String, HashMap<String, char>) {
     let index = file_content.iter().position(|x| x.is_empty()).unwrap();
     let polymer = file_content[0].to_string();
     let mut mapping: HashMap<_, _> = HashMap::new();
     for line in file_content[index + 1..].iter() {
         let splitted = line.split(" -> ").collect::<Vec<_>>();
-        mapping.insert(splitted[0], splitted[1]);
+        mapping.insert(splitted[0].to_string(), splitted[1].chars().nth(0).unwrap());
     }
     (polymer, mapping)
 }
-fn count_occurences(polymer: &String) -> usize {
-    let mut counter: HashMap<_, _> = HashMap::new();
-    for ch in polymer.chars() {
+
+fn update_counter(polymer: &str, counter: &mut HashMap<char, usize>) {
+    for ch in polymer[1..].chars() {
         let entry = counter.entry(ch).or_insert(0);
         *entry += 1;
     }
-    let min = counter.values().min().unwrap();
-    let max = counter.values().max().unwrap();
-    max - min
+}
+
+fn expand_polymer(
+    s: &str,
+    mapping: &HashMap<String, char>,
+    counter: &mut HashMap<char, usize>,
+    depth: usize,
+    max_depth: usize,
+) {
+    if depth == max_depth {
+        update_counter(s, counter);
+        return;
+    }
+    let new_letter = mapping[s];
+    let left = format!("{}{}", s.chars().nth(0).unwrap(), new_letter);
+    let right = format!("{}{}", new_letter, s.chars().nth(1).unwrap());
+    expand_polymer(&left, mapping, counter, depth + 1, max_depth);
+    expand_polymer(&right, mapping, counter, depth + 1, max_depth);
 }
 
 fn part_1(file_content: &Vec<String>) -> usize {
-    let (mut polymer, mapping) = parse_input(&file_content);
-    for _ in 0..10 {
-        let mut collector: Vec<_> = vec![];
-        for idx in 0..(polymer.len() - 1) {
-            collector.push(&polymer[idx..idx + 1]);
-            collector.push(mapping[&polymer[idx..idx + 2]]);
-        }
-        collector.push(&polymer[polymer.len() - 1..polymer.len()]);
-        polymer = collector.iter().map(|x| x.to_string()).collect::<String>();
+    let (polymer, mapping) = parse_input(&file_content);
+    let mut counter: HashMap<_, _> = HashMap::new();
+    for i in 0..polymer.len() - 1 {
+        expand_polymer(&polymer[i..i + 2], &mapping, &mut counter, 0, 10)
     }
-    count_occurences(&polymer)
+
+    for (k, v) in counter.iter() {
+        println!("{} {}", k, v);
+    }
+
+    let first_char = &polymer[0..1].chars().nth(0).unwrap();
+    let entry = counter.entry(*first_char).or_insert(0);
+    *entry += 1;
+
+    let min = counter.values().min().unwrap();
+    let max = counter.values().max().unwrap();
+    max - min
 }
 
 fn part_2(file_content: &Vec<String>) -> usize {
