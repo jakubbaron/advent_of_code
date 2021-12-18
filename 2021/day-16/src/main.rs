@@ -232,6 +232,92 @@ fn get_packets(s: &str, packet_start: usize, end_idx: usize, packets: &mut Vec<P
     };
 }
 
+fn get_packets_2(s: &str, packet_start: usize, end_idx: usize, values: &mut Vec<usize>) -> usize {
+    let mut idx = packet_start;
+    let version = str_to_usize(&s[idx..idx + 3]);
+    idx += 3;
+    let packet_type_id = str_to_usize(&s[idx..idx + 3]);
+    idx += 3;
+    match packet_type_id {
+        4 => {
+            println!("Constructing LiteralPacket");
+            let packet = LiteralPacket::new(&s, packet_start);
+            println!("{:?}", packet);
+            let LiteralPacket {
+                packet_length,
+                value,
+                ..
+            } = packet;
+            let new_idx = packet_start + packet_length;
+            values.push(value);
+            return new_idx;
+        }
+        _ => {
+            let length_type_id = str_to_usize(&s[idx..idx + 1]);
+            idx += 1;
+            let mut new_values: Vec<_> = vec![];
+            let mut new_idx;
+            match length_type_id {
+                0 => {
+                    println!("Constructing OperatorPacketBit15");
+                    let packet = OperatorPacketBit15::new(&s, packet_start);
+                    println!("{:?}", packet);
+                    let OperatorPacketBit15 {
+                        subpacket_length,
+                        packet_length,
+                        ..
+                    } = packet;
+                    new_idx = packet_start + packet_length;
+                    let subpacket_end = new_idx + subpacket_length;
+                    while new_idx < subpacket_end {
+                        new_idx = get_packets_2(s, new_idx, end_idx, &mut new_values);
+                    }
+                }
+                1 => {
+                    println!("Constructing OperatorPacketBit11");
+                    let packet = OperatorPacketBit11::new(&s, packet_start);
+                    println!("{:?}", packet);
+                    let OperatorPacketBit11 {
+                        number_of_packets,
+                        packet_length,
+                        ..
+                    } = packet;
+                    new_idx = packet_start + packet_length;
+                    for _ in 0..number_of_packets {
+                        new_idx = get_packets_2(&s, new_idx, end_idx, &mut new_values);
+                    }
+                }
+
+                _ => panic!("Nope!!"),
+            }
+            println!("values: {:?}", new_values);
+            println!("new values: {:?}", new_values);
+            values.push(match packet_type_id {
+                0 => new_values.iter().sum::<usize>(),
+                1 => new_values.iter().fold(1, |acc, val| acc * val),
+                2 => *new_values.iter().min().unwrap(),
+                3 => *new_values.iter().max().unwrap(),
+                5 => {
+                    assert_eq!(new_values.len(), 2);
+                    (new_values[0] > new_values[1]) as usize
+                }
+                6 => {
+                    assert_eq!(new_values.len(), 2);
+                    (new_values[0] < new_values[1]) as usize
+                }
+                7 => {
+                    assert_eq!(new_values.len(), 2);
+                    (new_values[0] == new_values[1]) as usize
+                }
+                _ => {
+                    panic!("BIG NOPE!!")
+                }
+            });
+            return new_idx;
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -335,6 +421,94 @@ mod tests {
         println!("{:?}", packets);
         assert_eq!(packets.iter().map(Packet::version).sum::<usize>(), 31);
     }
+
+    #[test]
+    fn first_example_part_2() {
+        let data = "C200B40A82";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 3);
+    }
+
+    #[test]
+    fn second_example_part_2() {
+        let data = "04005AC33890";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 54);
+    }
+
+    #[test]
+    fn third_example_part_2() {
+        let data = "880086C3E88112";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 7);
+    }
+
+    #[test]
+    fn fourth_example_part_2() {
+        let data = "CE00C43D881120";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 9);
+    }
+
+    #[test]
+    fn fifth_example_part_2() {
+        let data = "D8005AC2A8F0";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 1);
+    }
+
+    #[test]
+    fn sixth_example_part_2() {
+        let data = "F600BC2D8F";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 0);
+    }
+
+    #[test]
+    fn seventh_example_part_2() {
+        let data = "9C005AC2F8F0";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 0);
+    }
+
+    #[test]
+    fn eighth_example_part_2() {
+        let data = "9C0141080250320F1802104A08";
+        let s = string_to_binary(&data);
+        let mut values: Vec<_> = vec![];
+        let end = get_packets_2(&s, 0, s.len(), &mut values);
+        println!("{:?}", values);
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0], 1);
+    }
 }
 
 fn part_1(file_content: &Vec<String>) -> usize {
@@ -347,16 +521,21 @@ fn part_1(file_content: &Vec<String>) -> usize {
 }
 
 fn part_2(file_content: &Vec<String>) -> usize {
-    0
+    let data_string = &file_content[0];
+    let s = string_to_binary(&data_string);
+    let mut values: Vec<_> = vec![];
+
+    let _ = get_packets_2(&s, 0, s.len(), &mut values);
+    values[0]
 }
 
 fn main() -> io::Result<()> {
     let files_results = vec![
-        ("test.txt", 16, 0),
-        ("test1.txt", 12, 0),
-        ("test2.txt", 23, 0),
-        ("test3.txt", 31, 0),
-        ("input.txt", 957, 0),
+        ("test.txt", 16, 15),
+        ("test1.txt", 12, 46),
+        ("test2.txt", 23, 46),
+        ("test3.txt", 31, 54),
+        ("input.txt", 957, 744953223228),
     ];
     for (f, result_1, result_2) in files_results.into_iter() {
         println!("{}", f);
