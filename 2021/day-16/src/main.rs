@@ -167,12 +167,8 @@ impl Packet {
     }
 }
 
-fn get_packets(s: &str, start_idx: usize, end_idx: usize, packets: &mut Vec<Packet>) -> usize {
-    let mut idx = start_idx;
-    if idx + 8 >= end_idx {
-        return usize::MAX;
-    }
-    let packet_start = idx;
+fn get_packets(s: &str, packet_start: usize, end_idx: usize, packets: &mut Vec<Packet>) -> usize {
+    let mut idx = packet_start;
     let version = str_to_usize(&s[idx..idx + 3]);
     idx += 3;
     let packet_type_id = str_to_usize(&s[idx..idx + 3]);
@@ -234,7 +230,6 @@ fn get_packets(s: &str, start_idx: usize, end_idx: usize, packets: &mut Vec<Pack
             }
         }
     };
-    usize::MAX
 }
 
 #[cfg(test)]
