@@ -50,7 +50,6 @@ impl LiteralPacket {
     fn get_str_groups(s: &str, start_idx: usize, end_idx: usize) -> String {
         let mut v: Vec<_> = vec![];
         let mut idx = start_idx;
-        // println!("{} {}", start_idx, end_idx);
         while idx != end_idx {
             v.push(&s[idx + 1..idx + 5]);
             idx += 5;
@@ -64,7 +63,6 @@ impl LiteralPacket {
         let end_idx = LiteralPacket::find_end(s, start_idx);
         let value = str_to_usize(&LiteralPacket::get_str_groups(s, start_idx + 6, end_idx));
         let diff = (end_idx - (start_idx + 6)) % 5;
-        // println!("{} {} {}", start_idx, end_idx, diff);
         let packet_length = (end_idx + diff) - start_idx;
         LiteralPacket {
             version,
