@@ -32,7 +32,6 @@ struct LiteralPacket {
     packet_type_id: usize,
     value: usize,
     packet_length: usize,
-    to_ignore: usize,
 }
 
 fn str_to_usize(s: &str) -> usize {
@@ -67,13 +66,11 @@ impl LiteralPacket {
         let diff = (end_idx - (start_idx + 6)) % 5;
         // println!("{} {} {}", start_idx, end_idx, diff);
         let packet_length = (end_idx + diff) - start_idx;
-        let to_ignore = 4 - (packet_length % 4);
         LiteralPacket {
             version,
             packet_type_id,
             value,
             packet_length,
-            to_ignore,
         }
     }
 }
@@ -190,7 +187,6 @@ fn get_packets(s: &str, start_idx: usize, end_idx: usize, packets: &mut Vec<Pack
             let LiteralPacket { packet_length, .. } = packet;
             let new_idx = packet_start + packet_length;
             packets.push(Packet::LiteralPacketE(packet));
-            println!("new idx {}", new_idx);
             return new_idx;
         }
         _ => {
@@ -254,7 +250,6 @@ mod tests {
         let l = LiteralPacket::new(&s, 0);
         assert_eq!(l.value, 2021);
         assert_eq!(l.packet_length, 21);
-        assert_eq!(l.to_ignore, 3);
     }
 
     #[test]
