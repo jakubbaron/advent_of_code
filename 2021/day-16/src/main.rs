@@ -175,7 +175,7 @@ impl Packet {
 fn get_packets(s: &str, start_idx: usize, end_idx: usize, packets: &mut Vec<Packet>) -> usize {
     let mut idx = start_idx;
     if idx + 8 >= end_idx {
-        return usize::MAX - 10000;
+        return usize::MAX;
     }
     let packet_start = idx;
     let version = str_to_usize(&s[idx..idx + 3]);
@@ -191,7 +191,7 @@ fn get_packets(s: &str, start_idx: usize, end_idx: usize, packets: &mut Vec<Pack
             let new_idx = packet_start + packet_length;
             packets.push(Packet::LiteralPacketE(packet));
             println!("new idx {}", new_idx);
-            return get_packets(s, new_idx, end_idx, packets);
+            return new_idx;
         }
         _ => {
             let length_type_id = str_to_usize(&s[idx..idx + 1]);
@@ -240,7 +240,7 @@ fn get_packets(s: &str, start_idx: usize, end_idx: usize, packets: &mut Vec<Pack
             }
         }
     };
-    usize::MAX - 10000
+    usize::MAX
 }
 
 #[cfg(test)]
